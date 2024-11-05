@@ -1,8 +1,9 @@
-# Flow Backend with FastAPI, PostgreSQL, Docker, and Redis
+
+# MedConnect Backend with FastAPI, PostgreSQL, Docker, Redis, and AI Integration
 
 ## Overview
 
-Flow is a platform that connects artisans with both soft skills and manual skills to individuals who are looking for their services. This backend application is built using FastAPI, PostgreSQL as the database, Docker for containerization, and Redis for caching purposes.
+MedConnect is a medical platform designed to connect patients, doctors, and administrators in a unified space for managing healthcare needs. Patients can consult with doctors, share medical data, and access personalized treatment insights. Doctors can track patient histories, document diagnoses, and suggest treatments. With AI integration, MedConnect offers predictive insights on possible drug reactions, ailments, and treatment recommendations based on patient history.
 
 ## Table of Contents
 
@@ -13,18 +14,19 @@ Flow is a platform that connects artisans with both soft skills and manual skill
 2. [Project Structure](#project-structure)
 3. [Endpoints](#endpoints)
    - [Authentication](#authentication)
-   - [User](#user)
-   - [Artisan](#artisan)
-   - [Service](#service)
-   - [Booking](#booking)
-   - [Search](#search)
+   - [User Roles](#user-roles)
+   - [Patient Management](#patient-management)
+   - [Doctor Management](#doctor-management)
+   - [Medical Data](#medical-data)
+   - [Predictive Analysis](#predictive-analysis)
 4. [Database Models](#database-models)
 5. [Dockerization](#dockerization)
 6. [Caching with Redis](#caching-with-redis)
-7. [Testing](#testing)
-8. [Deployment](#deployment)
-9. [Contributing](#contributing)
-10. [License](#license)
+7. [AI Integration](#ai-integration)
+8. [Testing](#testing)
+9. [Deployment](#deployment)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ## 1. Getting Started
 
@@ -35,63 +37,63 @@ Flow is a platform that connects artisans with both soft skills and manual skill
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Redis](https://redis.io/)
+- [AI Model Requirements] (see AI model documentation for setup)
 
 ### Installation
 
 1. Clone the repository:
 
-```bash
-git clone https://github.com/derekzyl/flow.git
-cd flow/flow-backend
-```
+   ```bash
+   git clone https://github.com/yourusername/medconnect.git
+   cd medconnect-backend
+   ```
 
 2. Create a virtual environment and activate it:
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
 
 3. Install the required dependencies:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ### Running the Application
 
 1. Start PostgreSQL and Redis services using Docker Compose:
 
-```bash
-docker-compose up -d
-```
+   ```bash
+   docker-compose up -d
+   ```
 
 2. Initialize the database and create tables:
 
-```bash
-python app/db/init_db.py
-```
+   ```bash
+   python app/db/init_db.py
+   ```
 
 3. Run the FastAPI application:
 
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
 
-The application is now running and accessible at `http://localhost:8000`.
+The application will be accessible at `http://localhost:8000`.
 
 ## 2. Project Structure
 
 ```
-flow-backend/
+medconnect-backend/
 |-- app/
 |   |-- api/
 |   |   |-- __init__.py
-|   |   |-- artisan.py
-|   |   |-- booking.py
-|   |   |-- search.py
-|   |   |-- service.py
-|   |   |-- user.py
+|   |   |-- patient.py
+|   |   |-- doctor.py
+|   |   |-- medical_data.py
+|   |   |-- predictive_analysis.py
 |   |-- db/
 |   |   |-- __init__.py
 |   |   |-- base.py
@@ -102,6 +104,9 @@ flow-backend/
 |   |   |-- __init__.py
 |   |   |-- config.py
 |   |   |-- security.py
+|   |-- ai/
+|   |   |-- __init__.py
+|   |   |-- predictive_model.py
 |   |-- main.py
 |-- tests/
 |   |-- __init__.py
@@ -118,81 +123,85 @@ flow-backend/
 
 ### Authentication
 
-- **POST /login**: Endpoint for user login. It returns an access token.
+- **POST /login**: Endpoint for user login. Returns an access token.
 
-### User
+### User Roles
 
-- **POST /users**: Endpoint for user registration.
-- **GET /users/{user_id}**: Get user details by user ID.
+- **Admin**: Can manage doctors, patients, and access system logs.
+- **Doctor**: Can manage patient records, add medical notes, and generate predictions.
+- **Patient**: Can view their medical history, consult doctors, and review predicted insights.
 
-### Artisan
+### Patient Management
 
-- **POST /artisans**: Endpoint for artisan registration.
-- **GET /artisans/{artisan_id}**: Get artisan details by artisan ID.
+- **POST /patients**: Register a new patient.
+- **GET /patients/{patient_id}**: Retrieve patient details by patient ID.
 
-### Service
+### Doctor Management
 
-- **POST /services**: Endpoint for creating a new service.
-- **GET /services/{service_id}**: Get service details by service ID.
+- **POST /doctors**: Register a new doctor.
+- **GET /doctors/{doctor_id}**: Retrieve doctor details by doctor ID.
 
-### Booking
+### Medical Data
 
-- **POST /bookings**: Endpoint for creating a booking.
-- **GET /bookings/{booking_id}**: Get booking details by booking ID.
+- **POST /medical_data**: Add new medical data entry for a patient.
+- **GET /medical_data/{patient_id}**: Retrieve all medical data for a patient.
 
-### Search
+### Predictive Analysis
 
-- **GET /search**: Endpoint for searching artisans and services based on specific criteria.
+- **POST /predict**: Generate predictions based on patient data.
+- **GET /predictions/{patient_id}**: Retrieve past predictions for a specific patient.
 
 ## 4. Database Models
 
 The backend uses SQLAlchemy ORM to define the following database models:
 
-- User: Represents a registered user on the platform.
-- Artisan: Represents an artisan with soft skills or manual skills.
-- Service: Represents a service provided by an artisan.
-- Booking: Represents a booking made by a user for a specific service.
+- **User**: Represents a registered user on the platform.
+- **Doctor**: Represents a doctor with medical credentials.
+- **Patient**: Represents a patient and their medical history.
+- **MedicalData**: Holds patient records and diagnoses.
+- **Prediction**: Stores prediction data for future insights.
 
 ## 5. Dockerization
 
-The application can be easily deployed using Docker. The Dockerfile defines the environment and dependencies needed to run the application. Docker Compose is used to manage the PostgreSQL and Redis services required by the application.
+The application uses Docker for easy deployment. The Dockerfile and Docker Compose configuration manage FastAPI, PostgreSQL, and Redis.
 
 ## 6. Caching with Redis
 
-Redis is used for caching purposes to improve the performance of frequently accessed data, such as search results and service details.
+Redis is used to cache frequently accessed data, such as medical records and predictions, to improve response time and reduce load.
 
-## 7. Testing
+## 7. AI Integration
 
-Unit tests are included in the `tests` directory. You can run the tests using the following command:
+AI models for prediction are loaded in the `ai/predictive_model.py` module. The models are trained to predict drug interactions, potential health risks, and best treatment options based on historical data.
 
-```bash
-pytest
-```
+## 8. Testing
 
-## 8. Deployment
+Run unit tests using:
 
-To deploy the application in production, follow these steps:
+   ```bash
+   pytest
+   ```
 
-1. Set the appropriate environment variables in the `.env` file, such as database credentials and secret keys.
+## 9. Deployment
 
+For production deployment:
+
+1. Set environment variables in the `.env` file.
 2. Build the Docker image:
 
-```bash
-docker build -t flow-backend .
-```
+   ```bash
+   docker build -t medconnect-backend .
+   ```
 
-3. Run the Docker container:
+3. Run the container:
 
-```bash
-docker run -d -p 8000:8000 --name flow-backend-container flow-backend
-```
+   ```bash
+   docker run -d -p 8000:8000 --name medconnect-backend-container medconnect-backend
+   ```
 
-## 9. Contributing
+## 10. Contributing
 
-We welcome contributions to improve the Flow backend. To contribute, please follow the guidelines outlined in [CONTRIBUTING.md](CONTRIBUTING.md).
+We welcome contributions to improve MedConnect. Please follow the guidelines in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## 10. License
+## 11. License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for more details.
-# servital-backend
-# backend
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

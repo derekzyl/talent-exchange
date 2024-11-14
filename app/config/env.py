@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-from functools import lru_cache
 from typing import TypedDict
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,7 +34,8 @@ class env_type(TypedDict):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", validate_default=False)
     jwt_secret: str=""
     jwt_access_expiry_time:str=""
     jwt_refresh_expiry_time: str=""

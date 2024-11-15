@@ -38,7 +38,7 @@ class UserService:
         except Exception as e:
             raise HTTPException(status_code=400, detail=response_message(error=e, success_status=False, message="User not found"))
 
-    async def get_users(self, query:dict, filter:dict ):   
+    async def get_users(self, query:dict, filter:dict ):    # type: ignore
         try:
             users = await self.crud_service.get_many(query=query, filter=filter)
             

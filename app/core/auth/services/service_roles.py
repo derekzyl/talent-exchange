@@ -1,7 +1,7 @@
 
 
 class RolesService:
-    def __init__(self, user):
+    def __init__(self, user): # type: ignore
         self.user = user
 
     def is_admin(self):

@@ -156,7 +156,6 @@ class AuthService(UserService):
         return response_message(success_status=True, message="email sent successfully", data="if you have an account, an email has been sent to you to proceed with reset password")    
         
        
-#create access for business users
- 
+
 
 

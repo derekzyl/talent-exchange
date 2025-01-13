@@ -22,7 +22,7 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
-    async def create(self, db: Session, *, obj_in: CreateSchemaType, check_filter: dict = None) -> ModelType:
+    async def create(self, db: Session, *, obj_in: CreateSchemaType, check_filter: dict|None = None) -> ModelType:
         """Create a new record"""
         if check_filter:
             existing = db.query(self.model).filter_by(**check_filter).first()

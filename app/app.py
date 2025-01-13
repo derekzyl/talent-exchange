@@ -20,8 +20,8 @@ def init_app(init_db=True):
             if init_db:
                 session_manager.init(env["database_url"])
                 async with session_manager.connect() as connection:
-                    # await session_manager.create_all(connection)
-                     await session_manager.drop_all(connection)
+                    await session_manager.create_all(connection)
+                    #  await session_manager.drop_all(connection)
             yield
         finally:
             if session_manager._engine is not None:

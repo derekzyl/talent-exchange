@@ -36,5 +36,5 @@ class NotificationModel(Base, TimeStamp):
     user_id: Mapped[str] = mapped_column(ForeignKey("USER.id"))
 
     #relationship
-    notification___user: Mapped["UserModel"] = relationship( back_populates="user___notification"  )
+    notification__user: Mapped["UserModel"] = relationship( back_populates="user__notification"  )
 

@@ -29,7 +29,7 @@ class Mailer:
             MAIL_SERVER=env.env['mail']['mail_server'],
             MAIL_PORT=env.env["mail"]["mail_port"],
             MAIL_USERNAME=env.env["mail"]["mail_username"],
-            MAIL_PASSWORD=env.env["mail"]["mail_password"],
+            MAIL_PASSWORD=env.env["mail"]["mail_password"] ,
             MAIL_FROM=env.env["mail"]["mail_sender"],
             MAIL_FROM_NAME="medic",
             MAIL_SSL_TLS=False,

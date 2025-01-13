@@ -6,7 +6,6 @@ from typing import Optional
 @dataclass
 class NotificationTemplate:
     id: int
-    business_id: int
     template_for: str
     email_body: str
     sms_body: str

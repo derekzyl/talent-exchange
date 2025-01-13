@@ -34,8 +34,19 @@ class DatabaseSessionManager:
         self._sessionmaker: async_sessionmaker | None = None
 
     def init(self, host: str):
-        self._engine = create_async_engine(host)
-        self._sessionmaker = async_sessionmaker(bind=self._engine, expire_on_commit=False)
+        self._engine = create_async_engine(
+            host,
+            echo=False,  # Set to True for SQL query logging
+            pool_pre_ping=True,  # Enable connection pool pre-ping
+            pool_size=10,  # Maximum number of connections in the pool
+            max_overflow=20  # Maximum number of connections that can be created beyond pool_size
+        )
+        self._sessionmaker = async_sessionmaker(
+            bind=self._engine,
+            expire_on_commit=False,
+            autoflush=False,
+            autocommit=False
+        )
 
     async def close(self):
         if self._engine is None:
@@ -55,6 +66,8 @@ class DatabaseSessionManager:
             except Exception:
                 await connection.rollback()
                 raise
+            finally:
+                await connection.close()
 
     @contextlib.asynccontextmanager
     async def session(self) -> AsyncIterator[AsyncSession]:
@@ -77,7 +90,7 @@ class DatabaseSessionManager:
     async def drop_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.drop_all)
 
-# Example usage
+
 session_manager = DatabaseSessionManager()
 async def get_db():
     async with session_manager.session() as session:

@@ -11,6 +11,8 @@ from app.utils.uuid_generator import id_gen
 
 if TYPE_CHECKING:
     from app.core.auth.models.model_token import TokenModel
+    from app.core.notification.models.model_notification import NotificationModel
+    
 
 class UserModel(Base, TimeStamp):
     __tablename__ = "USER"
@@ -24,6 +26,7 @@ class UserModel(Base, TimeStamp):
     email:Mapped[str]= mapped_column(String(255), unique=True, nullable=False)
     phone:Mapped[str] = mapped_column(String(255), unique=True, nullable=True)
     language:Mapped[str]= mapped_column(String(255), unique=True, nullable=True)
+
     
     gender:Mapped[str]=mapped_column(Enum(GenderE), nullable=True)
 
@@ -37,5 +40,6 @@ class UserModel(Base, TimeStamp):
     #relationship
     # user__business:Mapped["BusinessModel"] = relationship(back_populates="business__user")
     user__token:Mapped["TokenModel"] = relationship(back_populates="token__user")
+    user__notification:Mapped["NotificationModel"] = relationship(back_populates="notification__user")
 
 

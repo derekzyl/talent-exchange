@@ -13,7 +13,7 @@ Base = declarative_base()
 
 class NewQueries:
     """Query helper class for handling filtering, sorting, and pagination"""
-    def __init__(self, query: Query, request_query: dict[str, Any]):
+    def __init__(self, query: Query, request_query: dict[str, Any]|None = None):
         self.query = query
         self.request_query = request_query
 
@@ -21,6 +21,9 @@ class NewQueries:
         """Apply filters from query parameters"""
         filter_params = {}
         excluded_fields = ["page", "sort", "limit", "fields"]
+
+        if not self.request_query:
+            return self
         
         for key, value in self.request_query.items():
             if key not in excluded_fields:
@@ -42,6 +45,8 @@ class NewQueries:
 
     def sort(self):
         """Apply sorting"""
+        if not self.request_query:
+            return self 
         if self.request_query.get("sort"):
             sort_fields = self.request_query["sort"].split(",")
             for field in sort_fields:
@@ -55,6 +60,8 @@ class NewQueries:
 
     def paginate(self):
         """Apply pagination"""
+        if not self.request_query:
+            return self
         page = int(self.request_query.get("page", 1))
         limit = int(self.request_query.get("limit", 100))
         skip = (page - 1) * limit

@@ -5,7 +5,7 @@ from typing import Optional
 @dataclass
 class SuperadminCommunicatorLog:
     id: int
-    business_ids: Optional[str]
+  
     subject: Optional[str]
     message: Optional[str]
     created_at: Optional[str]

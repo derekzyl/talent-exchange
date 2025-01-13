@@ -5,7 +5,7 @@ def create_response_message[T](
     success: bool,
     message: str,
     data: T|None = None,
-    doc_length: int = None,
+    doc_length: int|None = None,
     error: Any = None,
     stack: Any = None,
     config: str = "production"

@@ -44,7 +44,7 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db: Session, 
         *, 
         obj_list: List[CreateSchemaType],
-        check_filters: List[Dict] = None
+        check_filters: List[Dict]|None = None
     ) -> List[ModelType]:
         """Create multiple records"""
         if check_filters:
@@ -96,13 +96,13 @@ class CRUDService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self,
         db: Session,
         *,
-        filter_query: Dict[str, Any] = None,
-        query_params: Dict[str, Any] = None,
+        filter_query: Dict[str, Any]|None = None,
+        query_params: Dict[str, Any] |None = None,
         
         skip: int = 0,
         limit: int = 100,
-        order_by: str = None,
-        populate: List[str] = None
+        order_by: str|None = None,
+        populate: List[str]|None = None
     ) -> List[ModelType]:
         """Get multiple records with pagination and filtering"""
         query = db.query(self.model)

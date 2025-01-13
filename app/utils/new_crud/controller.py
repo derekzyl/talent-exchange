@@ -8,6 +8,8 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 import math
 
+from app.utils.new_crud.service import CRUDService
+
 # Define type variables
 ModelType = TypeVar("ModelType")
 CreateSchemaType = TypeVar("CreateSchemaType")
@@ -48,7 +50,7 @@ def create_api_router(
         db: Session,
         skip: int = Query(0),
         limit: int = Query(100),
-        filter_query: Dict[str, Any] = None,
+        filter_query: Dict[str, Any]|None = None,
         populate: List[str] = Query(None)
     ):
         """Get multiple records"""

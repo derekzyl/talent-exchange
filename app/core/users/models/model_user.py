@@ -24,6 +24,7 @@ class UserModel(Base, TimeStamp):
     email:Mapped[str]= mapped_column(String(255), unique=True, nullable=False)
     phone:Mapped[str] = mapped_column(String(255), unique=True, nullable=True)
     language:Mapped[str]= mapped_column(String(255), unique=True, nullable=True)
+    
     gender:Mapped[str]=mapped_column(Enum(GenderE), nullable=True)
 
     allow_login:Mapped[bool] = mapped_column(Boolean, default=True)

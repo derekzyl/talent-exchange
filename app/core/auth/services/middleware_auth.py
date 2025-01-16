@@ -102,22 +102,22 @@ class AuthMiddleware(BaseHTTPMiddleware):
         }
         return any(path.startswith(public_path) for public_path in public_paths)
 
-# dependencies/auth.py
-from fastapi import Depends, Request, HTTPException
-from typing import Dict, Any
+# # dependencies/auth.py
+# from fastapi import Depends, Request, HTTPException
+# from typing import Dict, Any
 
-async def get_current_user(request: Request) -> Dict[str, Any]:
-    user = getattr(request.state, "user", None)
-    if user is None:
-        raise HTTPException(
-            status_code=401,
-            detail=response_message(
-                error="User not authenticated",
-                success_status=False,
-                message="Unauthorized"
-            )
-        )
-    return user
+# async def get_current_user(request: Request) -> Dict[str, Any]:
+#     user = getattr(request.state, "user", None)
+#     if user is None:
+#         raise HTTPException(
+#             status_code=401,
+#             detail=response_message(
+#                 error="User not authenticated",
+#                 success_status=False,
+#                 message="Unauthorized"
+#             )
+#         )
+#     return user
 
 # # main.py
 # from fastapi import FastAPI

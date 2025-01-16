@@ -119,28 +119,28 @@ async def get_current_user(request: Request) -> Dict[str, Any]:
         )
     return user
 
-# main.py
-from fastapi import FastAPI
-from app.middleware.auth import AuthMiddleware
-from app.config.database import get_db
+# # main.py
+# from fastapi import FastAPI
+# from app.middleware.auth import AuthMiddleware
+# from app.config.database import get_db
 
-app = FastAPI()
+# app = FastAPI()
 
-# Add middleware
-@app.on_event("startup")
-async def startup_event():
-    db = await get_db()
-    app.add_middleware(AuthMiddleware, db_session=db)
+# # Add middleware
+# @app.on_event("startup")
+# async def startup_event():
+#     db = await get_db()
+#     app.add_middleware(AuthMiddleware, db_session=db)
 
-# Example protected route
-@app.get("/protected")
-async def protected_route(current_user: Dict[str, Any] = Depends(get_current_user)):
-    return {
-        "message": "This is a protected route",
-        "user": current_user
-    }
+# # Example protected route
+# @app.get("/protected")
+# async def protected_route(current_user: Dict[str, Any] = Depends(get_current_user)):
+#     return {
+#         "message": "This is a protected route",
+#         "user": current_user
+#     }
 
-# Example public route
-@app.get("/public")
-async def public_route():
-    return {"message": "This is a public route"}
+# # Example public route
+# @app.get("/public")
+# async def public_route():
+#     return {"message": "This is a public route"}

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.config.database.db import session_manager
 from app.config.env import env
+from app.core.auth.services.middleware_auth import AuthMiddleware
 from app.versions.route_handler import handle_routing
 
 
@@ -22,6 +23,7 @@ def init_app(init_db=True):
                 async with session_manager.connect() as connection:
                     await session_manager.create_all(connection)
                     #  await session_manager.drop_all(connection)
+            app.add_middleware(AuthMiddleware, db_session=session_manager)        
             yield
         finally:
             if session_manager._engine is not None:

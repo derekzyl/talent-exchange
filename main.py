@@ -7,6 +7,8 @@ from app.utils.crud.types_crud import response_message
 app = init_app()
 
 
+
+
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 # app.on_event("startup")
 

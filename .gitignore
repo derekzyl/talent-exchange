@@ -1,2 +1,4 @@
 .env
 /logs/*
+/vendor/*
+/__pycache__/*

@@ -14,7 +14,7 @@ def init_app(init_db=True):
      
     app:FastAPI = FastAPI()       
       # Add middleware before the lifespan context
-    app.add_middleware(AuthMiddleware, db_session=session_manager)
+    app.add_middleware(AuthMiddleware, db_session=session_manager) # type: ignore
 
     
 

@@ -61,7 +61,7 @@ class AuthService(UserService):
                     "token":token}
         except Exception as e:
             log.logs.error(f"error creating user {e}")
-            raise HTTPException(status_code=400, detail=response_message(error="user not created", success_status=False, message="User not created"))
+            return e
         finally:
             await self.db.close()
         

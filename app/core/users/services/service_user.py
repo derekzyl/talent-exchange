@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.users.models.model_user import UserModel
@@ -65,3 +65,9 @@ class UserService:
          
         except Exception as e:
             raise HTTPException(status_code=400, detail=response_message(error=e, success_status=False, message="User not updated"))     
+
+    @staticmethod
+    def get_logged_in_user(request:Request):
+        user = getattr(request.state, "user", None)
+        if not user:
+            raise HTTPException(status_code=401, detail=response_message(error="User not authorized", success_status=False, message="User not authorized"))

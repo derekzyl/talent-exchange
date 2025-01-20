@@ -1,11 +1,13 @@
 from fastapi import status
 from fastapi.responses import JSONResponse
 
-from app.app import init_app
+from app.app import init_app, session_manager
+from app.core.auth.services.middleware_auth import AuthMiddleware
 from app.utils.crud.types_crud import response_message
 
 app = init_app()
 
+# app.add_middleware(AuthMiddleware, db_session=session_manager)    
 
 
 

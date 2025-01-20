@@ -1,5 +1,4 @@
 
-import token
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (ARRAY, DATETIME, INTEGER, Boolean, DateTime, Enum,

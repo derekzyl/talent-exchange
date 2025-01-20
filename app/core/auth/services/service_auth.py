@@ -30,34 +30,40 @@ class AuthService(UserService):
         self.db = db
 
     async def create(self, data:CreateUserT):
-        password = password_hash.PassHash().hash_me(data['password']) 
-        if not password_regex.match(data["password"]):
-            raise HTTPException(status_code=400, detail=response_message(error="invalid password", success_status=False, message="password must be 8 character long with uppercase lowercase number and special character") )   
-        if not email_regex.match(data["email"]):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response_message(error="email is not valid", success_status=False, message="email not valid kindly check your email and retry"))
-        #check if the user does exist
+        try:
+            password = password_hash.PassHash().hash_me(data['password']) 
+            if not password_regex.match(data["password"]):
+                raise HTTPException(status_code=400, detail=response_message(error="invalid password", success_status=False, message="password must be 8 character long with uppercase lowercase number and special character") )   
+            if not email_regex.match(data["email"]):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response_message(error="email is not valid", success_status=False, message="email not valid kindly check your email and retry"))
+            #check if the user does exist
+            
+            user = select(UserModel).filter(UserModel.email == data["email"])
         
-        user = select(UserModel).filter(UserModel.email == data["email"])
-       
-        result =(await  self.db.scalars(user)).one_or_none()
-        if result:# type: ignore
-             
-            raise HTTPException(status_code=400, detail=response_message(error="user already exist", success_status=False, message="user already exist kindly login to continue"))
+            result =(await  self.db.scalars(user)).one_or_none()
+            if result:# type: ignore
+                
+                raise HTTPException(status_code=400, detail=response_message(error="user already exist", success_status=False, message="user already exist kindly login to continue"))
 
-        del data["password"] # type: ignore
-        user = await self.create_user(data={"password": password, **data})
-        if user["data"] is None: # type: ignore
-            raise HTTPException(status_code=400, detail=response_message(error="user not created", success_status=False, message="User not created")) 
-        
-        db_user = user["data"] # type: ignore
-        
-        token = await generate_auth_token(db_user.id, db=self.db )
-        
-        d = sqlalchemy_obj_to_dict(db_user)
-        
-        
-        return {'user':d,
-                "token":token}
+            del data["password"] # type: ignore
+            user = await self.create_user(data={"password": password, **data})
+            if user["data"] is None: # type: ignore
+                raise HTTPException(status_code=400, detail=response_message(error="user not created", success_status=False, message="User not created")) 
+            
+            db_user = user["data"] # type: ignore
+            
+            token = await generate_auth_token(db_user.id, db=self.db )
+            
+            d = sqlalchemy_obj_to_dict(db_user)
+            
+            
+            return {'user':d,
+                    "token":token}
+        except Exception as e:
+            log.logs.error(f"error creating user {e}")
+            raise HTTPException(status_code=400, detail=response_message(error="user not created", success_status=False, message="User not created"))
+        finally:
+            await self.db.close()
         
         
     async def login(self, data:LoginT):

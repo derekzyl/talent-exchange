@@ -12,8 +12,11 @@ def init_app(init_db=True):
     
 
      
+    app:FastAPI = FastAPI()       
+      # Add middleware before the lifespan context
+    app.add_middleware(AuthMiddleware, db_session=session_manager)
 
-
+    
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -21,16 +24,14 @@ def init_app(init_db=True):
             if init_db:
                 session_manager.init(env["database_url"])
                 async with session_manager.connect() as connection:
+                    from app.core.users.models.model_user import UserModel
                     await session_manager.create_all(connection)
                     #  await session_manager.drop_all(connection)
-            app.add_middleware(AuthMiddleware, db_session=session_manager)        
             yield
         finally:
             if session_manager._engine is not None:
                 await session_manager.close()  
        
-    app:FastAPI = FastAPI(lifespan=lifespan)       
-
+    app.router.lifespan_context=lifespan
     handle_routing(app=app)
     return app
-

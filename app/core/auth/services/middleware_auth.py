@@ -99,6 +99,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/openapi.json",
             "/auth/login",
             "/auth/register",
+            '/'
         }
         return any(path.startswith(public_path) for public_path in public_paths)
 

@@ -25,8 +25,9 @@ def init_app(init_db=True):
                 session_manager.init(env["database_url"])
                 async with session_manager.connect() as connection:
                     from app.core.users.models.model_user import UserModel
+                    from app.core.notification.models.model_notification import NotificationModel
                     await session_manager.create_all(connection)
-                    #  await session_manager.drop_all(connection)
+                    # await session_manager.drop_all(connection)
             yield
         finally:
             if session_manager._engine is not None:

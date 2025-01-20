@@ -11,13 +11,28 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import DateTime, String
 
+from app.utils.uuid_generator import id_gen
 class Base(DeclarativeBase):
     pass
+
 
 class TimeStamp:
     created_at: Mapped[datetime] = mapped_column(default=func.now())
     updated_at: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
+    deleted_at: Mapped[datetime] = mapped_column(DateTime, unique=True, nullable=True)
+
+class BaseModelClass(Base, TimeStamp):
+    __abstract__ = True
+    
+    id: Mapped[str] = mapped_column(
+        String(255), 
+        primary_key=True, 
+        default=id_gen,  # Remove the () to pass the function, not its result
+        unique=True
+    )
+
 
 class DatabaseSessionManager:
     def __init__(self):

@@ -5,20 +5,17 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Boolean, DateTime, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.config.database.db import Base, TimeStamp
+from app.config.database.db import Base, BaseModelClass, TimeStamp
 from app.core.users.types.type_user import GenderE
 from app.utils.uuid_generator import id_gen
 
 if TYPE_CHECKING:
     from app.core.auth.models.model_token import TokenModel
-    from app.core.notification.models.model_notification import NotificationModel
     
 
-class UserModel(Base, TimeStamp):
+class UserModel(BaseModelClass):
     __tablename__ = "USER"
-    id:Mapped[str] = mapped_column(
-        String(255), primary_key=True, default=id_gen() , unique=True
-    )
+    
     first_name:Mapped[str]
     last_name:Mapped[str]
     username:Mapped[str]= mapped_column(String(255), nullable=True, unique=True)
@@ -32,7 +29,7 @@ class UserModel(Base, TimeStamp):
 
     allow_login:Mapped[bool] = mapped_column(Boolean, default=True)
     
-    deleted_At:Mapped[datetime]= mapped_column(DateTime, unique=True, nullable=True)
+  
 
     # foreign keys
     # business_id:Mapped[str] = mapped_column(String(255), ForeignKey("BUSINESS.id"))
@@ -40,6 +37,6 @@ class UserModel(Base, TimeStamp):
     #relationship
     # user__business:Mapped["BusinessModel"] = relationship(back_populates="business__user")
     user__token:Mapped["TokenModel"] = relationship(back_populates="token__user")
-    user__notification:Mapped["NotificationModel"] = relationship(back_populates="notification__user")
+    user__notification= relationship("NotificationModel",back_populates="notification__user")
 
 

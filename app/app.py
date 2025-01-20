@@ -26,6 +26,8 @@ def init_app(init_db=True):
                 async with session_manager.connect() as connection:
                     from app.core.users.models.model_user import UserModel
                     from app.core.notification.models.model_notification import NotificationModel
+                    from app.core.auth.models.model_token import TokenModel
+                    from app.core.skills.models.model_skills import SkillModel
                     await session_manager.create_all(connection)
                     # await session_manager.drop_all(connection)
             yield

@@ -22,10 +22,9 @@ class SkillT(TypedDict):
     id:str
     skill_category: str
     skill_name: str
-    skill_sub_category: str
     skill_description: str
     skill_level: enum_skill_level
-    skill_experience: str
+
     
     user_id:str
     created_at:str
@@ -35,20 +34,18 @@ class SkillT(TypedDict):
 class CreateSkillT(TypedDict):
     skill_category: str
     skill_name: str
-    skill_sub_category: str
     skill_description: str
     skill_level: enum_skill_level
-    skill_experience: str
+
     user_id:str
 
 
 class UpdateSkillT(TypedDict):
     skill_category: str
     skill_name: str
-    skill_sub_category: str
     skill_description: str
     skill_level: enum_skill_level
-    skill_experience: str
+
     user_id:str
     id:str
 

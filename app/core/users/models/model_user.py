@@ -38,5 +38,6 @@ class UserModel(BaseModelClass):
     # user__business:Mapped["BusinessModel"] = relationship(back_populates="business__user")
     user__token:Mapped["TokenModel"] = relationship(back_populates="token__user")
     user__notification= relationship("NotificationModel",back_populates="notification__user")
+    user__skill= relationship("SkillModel", back_populates="skill__user")
 
 

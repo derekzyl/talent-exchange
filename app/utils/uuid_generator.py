@@ -7,23 +7,27 @@ from typing import Literal
 # initializing size of string
 N: Literal[10] = 10
 
-# using random.choices()
-# generating random strings
-res: str = "".join(random.choices(string.ascii_lowercase + string.digits, k=N))
-
-
-me: uuid.UUID = uuid.uuid4()
-j: str = str(me)
-k: list[str] = j.split("-")
-
-l: str = "".join(k)
-g = datetime.utcnow()
-hh = g.strftime("%Y%m%d%H%M%S")
 
 
 def id_gen() -> str:
+    """
+    Generates a unique identifier string.
+    The identifier is composed of three parts:
+    1. A timestamp of the current UTC time in the format YYYYMMDDHHMMSS.
+    2. A random string of lowercase letters and digits.
+    3. A UUID (Universally Unique Identifier) without dashes.
+    Returns:
+        str: The generated unique identifier.
+    """
 
-    m: str = hh + res + l
+    random_str = "".join(random.choices(string.ascii_lowercase + string.digits, k=N))
+    
+    # Get current timestamp
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    
+    # Generate UUID without dashes
+    uuid_str = str(uuid.uuid4()).replace('-', '')
+    
+    # Combine all parts
+    return f"{timestamp}{random_str}{uuid_str}"
 
-
-    return m

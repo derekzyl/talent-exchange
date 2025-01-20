@@ -2,7 +2,7 @@
 import contextlib
 from datetime import datetime
 from typing import AsyncIterator
-from sqlalchemy import func
+from sqlalchemy import func, event
 from sqlalchemy.ext.asyncio import (
     AsyncConnection, 
     AsyncEngine, 
@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, String
-
+from sqlalchemy.ext.declarative import declared_attr
 from app.utils.uuid_generator import id_gen
 class Base(DeclarativeBase):
     pass
@@ -26,12 +26,20 @@ class TimeStamp:
 class BaseModelClass(Base, TimeStamp):
     __abstract__ = True
     
-    id: Mapped[str] = mapped_column(
-        String(255), 
-        primary_key=True, 
-        default=id_gen,  # Remove the () to pass the function, not its result
-        unique=True
-    )
+    @declared_attr
+    def id(cls) -> Mapped[str]:
+        return mapped_column(
+            String(255),
+            primary_key=True,
+            default=id_gen,
+            unique=True
+        )
+    @classmethod
+    def __declare_last__(cls):
+        @event.listens_for(cls, 'before_insert')
+        def receive_before_insert(mapper, connection, instance):
+            if instance.id is None:
+                instance.id = id_gen()    
 
 
 class DatabaseSessionManager:

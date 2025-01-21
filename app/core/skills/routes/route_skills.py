@@ -32,10 +32,10 @@ async def get_user_skills(
 
 @skill_router.get("/search")
 async def search_skills(
+    db: Annotated[AsyncSession, Depends(get_db)],
     skill_name: Optional[str] = None,
     skill_category: Optional[str] = None,
     skill_level: Optional[enum_skill_level] = None,
-    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     skill_service = SkillService(db)
     return await skill_service.search_skills(skill_name, skill_category, skill_level)

@@ -1,16 +1,15 @@
-from tkinter import E
 from typing import TypedDict
 from enum import Enum
 
 
-class enum_skill_level(Enum, str):
+class enum_skill_level(Enum):
     beginner = "beginner"
     intermediate = "intermediate"
     advanced = "advanced"
     expert = "expert"
 
 
-class enum_available_day(Enum, str):
+class enum_available_day(Enum):
     monday = "monday"
     tuesday = "tuesday"
     wednesday = "wednesday"

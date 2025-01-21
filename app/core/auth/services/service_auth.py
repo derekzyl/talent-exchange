@@ -7,10 +7,8 @@ from sqlalchemy.orm import class_mapper
 
 from app.config import env
 from app.config.config import TokenType
-from app.core.auth.services.service_token import (generate_auth_token,
-                                                  generate_otp_token,
-                                                  generate_token,
-                                                  verify_otp_token)
+
+from app.core.auth.services.service_token import TokenService
 from app.core.auth.types.types_auth import ChangePassWordT, LoginT
 from app.core.notification.service.mailer import Mailer
 from app.core.users.models.model_user import UserModel
@@ -52,7 +50,7 @@ class AuthService(UserService):
             
             db_user = user["data"] # type: ignore
             
-            token = await generate_auth_token(db_user.id, db=self.db )
+            token = await TokenService.generate_auth_token(db_user.id, db=self.db )
             
             d = sqlalchemy_obj_to_dict(db_user)
             
@@ -74,8 +72,8 @@ class AuthService(UserService):
             user = await self.get_user({"email":data['email']})
         else:
             user = await self.get_user({"username":data['email']})
-                
-        if  user['data'] is None: # type: ignore
+        print('user',user)        
+        if user and user['data'] is None: # type: ignore
             raise HTTPException(status_code=400, detail=response_message(error="login error", success_status=False, message="incorrect username or password"))
 
         
@@ -90,7 +88,7 @@ class AuthService(UserService):
       
     
         
-        token = await generate_auth_token(db_user.id, db=self.db )
+        token = await TokenService.generate_auth_token(db_user.id, db=self.db )
         if isinstance(db_user, dict):
             db_user.pop('password', None)
         else:
@@ -138,7 +136,7 @@ class AuthService(UserService):
         
        return {'token':""}
     async def verify_email(self, data:dict):
-        get_token =  await verify_otp_token(db=self.db, user_id=data['user_id'], token= data['token'], type=TokenType.VERIFY_EMAIL, )
+        get_token =  await TokenService.verify_otp_token(db=self.db, user_id=data['user_id'], token= data['token'], type=TokenType.VERIFY_EMAIL, )
         if get_token is not None:
             stmt= update(UserModel).where(UserModel.id == data['user_id']).values(is_verified=True)
             await self.db.execute(stmt)

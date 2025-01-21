@@ -21,5 +21,5 @@ class SkillModel(BaseModelClass):
 
     # relationship
     skill__user = relationship("UserModel", back_populates="user__skill")
-    skill___skill_available_time = relationship("SkillAvailableTimeModel", back_populates="skill__skill_available_time")
+    skill__skill_available_time = relationship("SkillAvailableTimeModel", back_populates="skill_available_time__skill")
     

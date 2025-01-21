@@ -14,7 +14,7 @@ routesV1:list[RouterData]= [{
     'api_route':auth_router,'path':"auth",'tags':['auth'],
     
 },{
-    'api_route':user_router,'path':"users",'tags':['users']
+    'api_route':user_router,'path':"user",'tags':['users']
 }
                             ]
 

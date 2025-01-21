@@ -1,3 +1,4 @@
+from tokenize import Token
 import typing
 from typing import Annotated
 
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database.db import get_db, session_manager
 from app.core.auth.services.service_auth import AuthService
+from app.core.auth.services.service_token import TokenService
 from app.core.auth.types.types_auth import ChangePassWordT
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import (CreateUserD, CreateUserT,
@@ -85,3 +87,9 @@ async def change_password(data: ChangePassWordT, db: AsyncSession = Depends(get_
     log.logs.info(f'Password changed: {change_password}')
     json = jsonable_encoder(change_password)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json)
+
+@auth_router.get("/get-all-token", name="AUTH API", summary="tokens check")
+async def get_all_token(db: AsyncSession = Depends(get_db)):
+    user = await TokenService(db=db).get_all_tokens()
+   
+    return JSONResponse(status_code=status.HTTP_200_OK, content=user)

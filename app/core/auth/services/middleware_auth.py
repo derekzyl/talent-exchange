@@ -1,11 +1,14 @@
 # middleware/auth.py
+import re
 from typing import Optional, Dict, Any
 from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
+from app.config.config import TokenType
 from app.core.auth.models.model_token import TokenModel
+from app.core.auth.services.service_auth import TokenService
 from app.core.users.services.service_user import UserService
 from app.utils.crud.service_crud import AsyncSession, CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message
@@ -16,11 +19,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, db_session: AsyncSession):
         super().__init__(app)
         self.db = db_session
-        self.crud_service = CrudService(db=db_session, model=TokenModel) # type: ignore
+        # self.crud_service = CrudService(db=db_session, model=TokenModel) # type: ignore
+        self.token_service = TokenService
 
     async def get_current_user(self, token: str) -> Optional[Dict[str, Any]]:
+        # print("token", token)
         try:
-            token_result: ResponseMessage = await self.crud_service.get_one({"token": token})
+            token_result: ResponseMessage = await self.token_service.verify_token(token=token, db=self.db, type=TokenType.ACCESS_TOKEN)
+            print("token_result", token_result)
+
             if not token_result or not token_result.get('data'):
                 return None
             
@@ -36,6 +43,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
+        print( "should_skip_auth", request.url.path)
         if self.should_skip_auth(request.url.path):
             return await call_next(request)
 
@@ -80,8 +88,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return response
 
         except HTTPException as exc:
+            print("HTTPException", exc)
             raise exc
         except Exception as e:
+            print("Exception", e)
             raise HTTPException(
                 status_code=500,
                 detail=response_message(
@@ -97,9 +107,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/redoc",
             "/openapi.json",
-            "/auth/login",
+            "/api/v1/auth/login",
+            "/api/v1/auth/get-all-token",
             "/auth/register",
-            '/'
+            
+            
         }
         return any(path.startswith(public_path) for public_path in public_paths)
 

@@ -71,3 +71,6 @@ class UserService:
         user = getattr(request.state, "user", None)
         if not user:
             raise HTTPException(status_code=401, detail=response_message(error="User not authorized", success_status=False, message="User not authorized"))
+
+        else:
+            return user

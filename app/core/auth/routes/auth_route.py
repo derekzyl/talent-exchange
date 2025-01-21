@@ -14,6 +14,8 @@ from app.core.auth.types.types_auth import ChangePassWordT
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import (CreateUserD, CreateUserT,
                                             ForgotPasswordT, LoginUserT)
+from app.utils.convert_sqlalchemy_dict import sqlalchemy_obj_to_dict
+from app.utils.crud.types_crud import ResponseMessage
 from app.utils.logger import log
 
 auth_router = APIRouter()
@@ -90,6 +92,16 @@ async def change_password(data: ChangePassWordT, db: AsyncSession = Depends(get_
 
 @auth_router.get("/get-all-token", name="AUTH API", summary="tokens check")
 async def get_all_token(db: AsyncSession = Depends(get_db)):
-    user = await TokenService(db=db).get_all_tokens()
+    user: ResponseMessage = await TokenService(db=db).get_all_tokens()
+  
+    d = {} if user['data'] is None else sqlalchemy_obj_to_dict(user['data'])
+    if 'data' in user and user['data']:
+        d = sqlalchemy_obj_to_dict(user['data'])
+    print('user', user)
    
-    return JSONResponse(status_code=status.HTTP_200_OK, content=user)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={
+        'data': d,
+        'doc_length': len(d),
+        'message': 'Token retrieved',
+        'success_status': True
+    })

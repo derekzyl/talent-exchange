@@ -5,7 +5,7 @@ class ResponseMessage( TypedDict, total=False):
     success_status: bool
     message: str
     error: Any
-    data: Any| None
+    data: Any
     doc_length: int|None
 
 

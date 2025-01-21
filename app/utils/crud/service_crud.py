@@ -1,6 +1,6 @@
 
 from typing import Any, Dict, List, Optional
-
+from sqlalchemy import select  
 from fastapi import HTTPException, status
 from sqlalchemy import delete, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,36 +23,47 @@ class CrudService:
         self,
         query: Dict[str, Any],
         filter: Optional[Dict[str, Any]] = None,
-        select: Optional[List[str]] = None
+        select_fields: Optional[List[str]] = None
     ) -> ResponseMessage:
-        query_model = select(self.model) # type: ignore
+        query_model = sa_select(self.model) # type: ignore
+        try:
+            if filter:
+                for key, value in filter.items():
+                    query_model = query_model.where(getattr(self.model, key) == value)
 
-        if filter:
-            for key, value in filter.items():
-                query_model = query_model.where(getattr(self.model, key) == value)
+            query_handler = Queries(query_model, query)
 
-        query_handler = Queries(query_model, query)
+            # Apply select fields if provided
+            if select_fields:
+                query_handler.model = query_handler.model.with_only_columns(*[getattr(self.model, field) for field in select]) # type: ignore
 
-        # Apply select fields if provided
-        if select:
-            query_handler.model = query_handler.model.with_only_columns(*[getattr(self.model, field) for field in select]) # type: ignore
+            query_handler.filter().limit_fields().paginate().sort()
 
-        query_handler.filter().limit_fields().paginate().sort()
+            results = (await self.db.execute(query_handler.model)).scalars().all()
 
-        results = (await self.db.execute(query_handler.model)).scalars().all()
+            if not results:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=response_message(data=None, error="Data not found", message="Data not found", success_status=False)
+                )
 
-        if not results:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=response_message(data=None, error="Data not found", message="Data not found", success_status=False)
+            return response_message(
+                success_status=True,
+                message="Data fetched successfully",
+                data=results,
+                doc_length=len(results)
+            )
+        except Exception as e:
+            log.logs.error(f"Error fetching data: {e}")
+            return response_message(
+                data=None,
+                doc_length=0,
+                error=str(e),
+                message="Error fetching data",
+                success_status=False
             )
 
-        return response_message(
-            success_status=True,
-            message="Data fetched successfully",
-            data=results,
-            doc_length=len(results)
-        )
+
     async def get_one(self, data: Dict[str, Any], select: Optional[List[str]] = None) -> ResponseMessage:
         """
         This async function `get_one` retrieves data based on the provided parameters and returns a

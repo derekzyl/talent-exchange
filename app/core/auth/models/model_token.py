@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class   TokenModel(BaseModelClass):
     __tablename__="TOKEN"
     
-    type:Mapped[str] = mapped_column(Enum(TokenType), nullable=False )
+    type:Mapped[str] = mapped_column(String, nullable=False )
     expires:Mapped[str] = mapped_column(DateTime, nullable=False)
     blacklisted:Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     token:Mapped[str] = mapped_column(String, nullable=False)

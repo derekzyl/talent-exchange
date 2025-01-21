@@ -30,14 +30,22 @@ class SkillT(TypedDict):
     created_at:str
     updated_at:str
     deleted_at:str
-
-class CreateSkillT(TypedDict):
+class CreateTimeT(TypedDict):
+    available_day:str
+    start_time:str
+    end_time:str
+class CreateSkillT(TypedDict, ):
     skill_category: str
     skill_name: str
     skill_description: str
     skill_level: enum_skill_level
+    available_times: list[CreateTimeT] | None
 
     user_id:str
+
+    
+
+    
 
 
 class UpdateSkillT(TypedDict):

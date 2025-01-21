@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
-from app.config.database.db import session_manager
+from app.config.database.db import get_db, session_manager
 from app.config.env import env
 from app.core.auth.services.middleware_auth import AuthMiddleware
 from app.versions.route_handler import handle_routing
@@ -14,7 +14,7 @@ def init_app(init_db=True):
      
     app:FastAPI = FastAPI()       
       # Add middleware before the lifespan context
-    app.add_middleware(AuthMiddleware, db_session=session_manager) # type: ignore
+    app.add_middleware(AuthMiddleware, db_session=session_manager) 
 
     
 

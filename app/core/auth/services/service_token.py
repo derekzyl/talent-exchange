@@ -1,6 +1,7 @@
 import math
 import random
 from datetime import datetime, timedelta
+from tabnanny import check
 from typing import TypedDict
 
 from fastapi import HTTPException
@@ -23,7 +24,7 @@ jwt = MyJwt()
 class saveToken(TypedDict):
     token:str
     expires:int
-    type:TokenType
+    type:str
     user_id:str
     blacklisted:bool
 class TokenService:
@@ -76,7 +77,7 @@ class TokenService:
             token_data = await db.get_one(TokenModel, {
                 "user_id": token_data['sub'],
                 
-                "type": type,
+                "type": type.value,
                 "blacklisted": False
                 })
 
@@ -94,12 +95,51 @@ class TokenService:
                 status_code=400,
                                 detail=response_message(error=e, success_status=False, message="Invalid token")
             )    
+
+
+
+
+    @staticmethod
+    async def verify_jwt_token(token:str):
+        token_data = jwt.verify_token(token=token)
+
+        print("token_data",token_data)
+        
+        if isinstance(token_data['sub'], str)==False:
+            raise HTTPException(
+                status_code=400,
+                                detail=response_message(error="Invalid token", success_status=False, message="Invalid token")
+            )
+        try:
+            # check if token has expired
+
+            token_time = token_data['exp']
+           
+            if datetime.fromtimestamp(token_time) < datetime.now():
+                raise HTTPException(
+                    status_code=400,
+                                    detail=response_message(error="Invalid token", success_status=False, message="Invalid token")
+                )
+
+
+            return token_data["sub"]   
+                
+            
+             
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                                detail=response_message(error=e, success_status=False, message="Invalid token")
+            )    
+   
+
+
     @staticmethod
     async def verify_otp_token(token:str, user_id:str, type:TokenType, db:AsyncSession):
         try:
             token_data = await db.get_one(TokenModel, {
                 "user_id": user_id,
-                "type": type,
+                "type": type.value,
                 "blacklisted": False,
                 "token":token
                 })
@@ -136,7 +176,7 @@ class TokenService:
         await TokenService.save_token(data={
             "token":refresh_token,
             "expires":access_expiry_time,
-            "type":TokenType.REFRESH_TOKEN,
+            "type":TokenType.REFRESH_TOKEN.value,
             "user_id":user_id,
             "blacklisted":False
         }, db=db)

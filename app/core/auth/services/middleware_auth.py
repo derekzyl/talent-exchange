@@ -5,39 +5,59 @@ from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
-
+from sqlalchemy.future import select as sa_select
 from app.config.config import TokenType
+from app.config.database.db import DatabaseSessionManager
 from app.core.auth.models.model_token import TokenModel
-from app.core.auth.services.service_auth import TokenService
+from app.core.auth.services.service_token import TokenService
+from app.core.users.models.model_user import UserModel
 from app.core.users.services.service_user import UserService
+from app.utils.convert_sqlalchemy_dict import sqlalchemy_obj_to_dict
 from app.utils.crud.service_crud import AsyncSession, CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message
+from app.utils.logger import log
 
 security = HTTPBearer()
 
 class AuthMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, db_session: AsyncSession):
+    def __init__(self, app, db_session: DatabaseSessionManager):
         super().__init__(app)
         self.db = db_session
         # self.crud_service = CrudService(db=db_session, model=TokenModel) # type: ignore
         self.token_service = TokenService
 
-    async def get_current_user(self, token: str) -> Optional[Dict[str, Any]]:
+    async def get_current_user(self, token: str) -> Optional[ResponseMessage]:
         # print("token", token)
         try:
-            token_result: ResponseMessage = await self.token_service.verify_token(token=token, db=self.db, type=TokenType.ACCESS_TOKEN)
-            print("token_result", token_result)
-
-            if not token_result or not token_result.get('data'):
-                return None
             
-            user_service = UserService(self.db)
-            user = await user_service.get_user_by_id(token_result['data']["user_id"]) # type: ignore
+            token_result: str = await self.token_service.verify_jwt_token(token=token )
+            
+            if not token_result:
+                return ResponseMessage(
+                    data=None, 
+                    doc_length=0, 
+                    error="Invalid or expired token", 
+                    message="Unauthorized", 
+                    success_status=False
+                )
+            
+            user_service = TokenServic(self.db)
+        
+            user = await user_service.get_one({"id":token_result}) 
+            print("user home", user)
             if not user or not user.get('data'):
-                return None
+                return ResponseMessage(
+                    data=None, 
+                    doc_length=0, 
+                    error="User not found", 
+                    message="Unauthorized", 
+                    success_status=False
+                )
                 
-            return user['data'] # type: ignore
-        except Exception:
+            return user
+        except Exception as e:
+   
+            log.logs.error(f"Error getting user: {e}")
             return None
 
     async def dispatch(
@@ -70,12 +90,22 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     )
                 )
 
-            user = await self.get_current_user(token)
-            if not user:
+            current_user_response = await self.get_current_user(token)
+            if not current_user_response or "data" not in current_user_response:
                 raise HTTPException(
                     status_code=401,
                     detail=response_message(
                         error="Invalid or expired token",
+                        success_status=False,
+                        message="Unauthorized"
+                    )
+                )
+            user = dict(current_user_response["data"])
+            if not user:
+                raise HTTPException(
+                    status_code=401,
+                    detail=response_message(
+                        error="Invalid or expired token ",
                         success_status=False,
                         message="Unauthorized"
                     )
@@ -109,51 +139,56 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/openapi.json",
             "/api/v1/auth/login",
             "/api/v1/auth/get-all-token",
+            "/api/v1/auth/signup",
             "/auth/register",
             
             
         }
         return any(path.startswith(public_path) for public_path in public_paths)
 
-# # dependencies/auth.py
-# from fastapi import Depends, Request, HTTPException
-# from typing import Dict, Any
 
-# async def get_current_user(request: Request) -> Dict[str, Any]:
-#     user = getattr(request.state, "user", None)
-#     if user is None:
-#         raise HTTPException(
-#             status_code=401,
-#             detail=response_message(
-#                 error="User not authenticated",
-#                 success_status=False,
-#                 message="Unauthorized"
-#             )
-#         )
-#     return user
+class TokenServic:
+    def __init__(self, db: DatabaseSessionManager):
+        self.db = db
+        self.model = UserModel
 
-# # main.py
-# from fastapi import FastAPI
-# from app.middleware.auth import AuthMiddleware
-# from app.config.database import get_db
+    async def get_one(self, data: dict[str, Any], select: Optional[list[str]] = None) -> ResponseMessage:
+        async with self.db.session() as session:  # Obtain an AsyncSession
+            try:
+                query = sa_select(self.model).filter_by(**data)
 
-# app = FastAPI()
+                if select:
+                    include_fields = [field for field in select if not field.startswith('-')]
+                    exclude_fields = [field[1:] for field in select if field.startswith('-')]
 
-# # Add middleware
-# @app.on_event("startup")
-# async def startup_event():
-#     db = await get_db()
-#     app.add_middleware(AuthMiddleware, db_session=db)
+                    if include_fields:
+                        fields_to_select = [getattr(self.model, field) for field in include_fields]
+                        query = sa_select(*fields_to_select).filter_by(**data)
+                    else:
+                        all_fields = set(self.model.__table__.columns.keys())
+                        fields_to_select = [getattr(self.model, field) for field in all_fields if field not in exclude_fields]
+                        query = sa_select(*fields_to_select).filter_by(**data)
 
-# # Example protected route
-# @app.get("/protected")
-# async def protected_route(current_user: Dict[str, Any] = Depends(get_current_user)):
-#     return {
-#         "message": "This is a protected route",
-#         "user": current_user
-#     }
+                # Execute the query with AsyncSession
+                result = await session.execute(query)
+                db_item_selected = result.scalar()
 
-# # Example public route
-# @app.get("/public")
-# async def public_route():
-#     return {"message": "This is a public route"}
+                # Convert to dict for JSON serialization
+                result_dict = sqlalchemy_obj_to_dict(db_item_selected)
+                
+                return response_message(
+                    data=result_dict, 
+                    doc_length=1, 
+                    error=None, 
+                    message="Data fetched successfully", 
+                    success_status=True
+                )
+            except Exception as e:
+                log.logs.error(f"Error executing query: {e}")
+                return response_message(
+                    data=None, 
+                    doc_length=0, 
+                    error=str(e), 
+                    message="Error fetching data", 
+                    success_status=False
+                )

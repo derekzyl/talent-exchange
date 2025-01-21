@@ -17,7 +17,7 @@ class MyJwt:
         self.JWT_SECRET: str = jwt_secret
         self.IAT = datetime.now()
 
-    def create_token(self, subject: str,  token_type: str|Enum , expires_in: int):
+    def create_token(self, subject: str,  token_type: str , expires_in: int):
         payload = {}
         expire = timedelta(minutes= expires_in)
         payload["exp"] = datetime.now() + expire
@@ -28,7 +28,8 @@ class MyJwt:
 
         return jwt.encode(claims=payload, key=self.JWT_SECRET)
 
-    def verify_token(self, token: str)-> dict[str, Any]:
-        return jwt.decode(token=token, key=self.JWT_SECRET)
+    def verify_token(self, token: str) -> dict[str, Any]:
+        decoded_token = jwt.decode(token=token, key=self.JWT_SECRET)
+        return decoded_token
 
 

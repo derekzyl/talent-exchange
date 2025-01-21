@@ -13,7 +13,7 @@ from app.core.skills.models.model_skills import SkillModel
 from app.core.skills.models.model_available_time import SkillAvailableTimeModel
 from app.utils.crud.service_crud import CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message
-from app.core.skills.types.types_skills import SkillT, AvailableTimeT, enum_skill_level
+from app.core.skills.types.types_skills import CreateAvailableTimeT, SkillT, AvailableTimeT, enum_skill_level
 
 class SkillAvailableTimeService(CrudService):
     def __init__(self, db: AsyncSession):
@@ -83,7 +83,7 @@ class SkillAvailableTimeService(CrudService):
         result = await self.db.execute(query)
         return bool(result.scalar_one_or_none())
 
-    async def add_available_time(self, data: Dict[str, Any]) -> ResponseMessage:
+    async def add_available_time(self, data:CreateAvailableTimeT) -> ResponseMessage:
         """Add new available time with conflict checking"""
         has_conflict = await self.check_time_conflict(
             data["skill_id"],
@@ -130,8 +130,15 @@ class SkillAvailableTimeService(CrudService):
         return await self.update({"id": time_id}, data)
 
     async def soft_delete_available_time(self, time_id: str) -> ResponseMessage:
+        
         """Soft delete an available time slot"""
         return await self.update(
             filter={"id": time_id},
             data={"deleted_at": datetime.utcnow()}
         )        
+
+
+    async def create_many_available_time(self, data: List[CreateAvailableTimeT], check:list[dict]|None = None) -> ResponseMessage:
+        """Create multiple available times"""
+        return await self.create_many(data, check=check)
+    

@@ -11,13 +11,62 @@ from datetime import datetime
 from app.config.database.db import AsyncSession
 from app.core.skills.models.model_skills import SkillModel
 from app.core.skills.models.model_available_time import SkillAvailableTimeModel
+from app.core.skills.services.service_skill_avaialable_time import SkillAvailableTimeService
 from app.utils.crud.service_crud import CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message
-from app.core.skills.types.types_skills  import SkillT, AvailableTimeT, enum_skill_level
+from app.core.skills.types.types_skills  import CreateSkillT, CreateTimeT, SkillT, AvailableTimeT, enum_skill_level
 
 class SkillService(CrudService):
     def __init__(self, db: AsyncSession):
         super().__init__(model=SkillModel, db=db) # type: ignore
+
+
+    async def create_skill(self, data: CreateSkillT ) -> ResponseMessage:
+         
+
+        #  check if the skill already exists for the user 
+
+        skill = await self.get_one({"skill_name": data['skill_name'], "user_id": data['user_id']})
+        if skill.get('data'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ResponseMessage({
+                    "error": "Skill already exists",
+                    "message": "Skill already exists for the user",
+                    "success_status": False
+                    
+                }))
+            
+        skill_data = {
+            "skill_name": data['skill_name'],
+            "skill_category": data['skill_category'],
+            "skill_level": data['skill_level'].value,
+            "user_id": data['user_id'],
+            "skill_description": data['skill_description'],
+            
+        }
+        skill = await self.create(data=skill_data)
+        if "available_time" in data and data['available_time'] and 'data' in skill:
+            skill_time:list[CreateTimeT]  = data.pop('available_time', None)
+                  
+                       #  create available days 
+            new_data:list[dict] = []
+            available_time_service = SkillAvailableTimeService(self.db)
+
+            for time in skill_time:
+                new_data.append({
+                    "available_day": time['available_day'],
+                    "start_time": time['start_time'],
+                    "end_time": time['end_time'],
+                    "skill_id": skill['data']['id']
+                })
+
+            await available_time_service.add_available_time(data=new_data)   
+        return response_message(
+            data=skill,
+            message="Skill created successfully",
+            success_status=True
+        )   
 
     async def get_user_skills(self, user_id: str) -> ResponseMessage:
         """Get all skills for a specific user"""

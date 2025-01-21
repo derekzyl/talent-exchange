@@ -6,6 +6,8 @@ from sqlalchemy import delete, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.future import select as sa_select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import insert
 
 from app.utils.crud.types_crud import ResponseMessage, response_message
 from app.utils.logger import log
@@ -218,3 +220,50 @@ class CrudService:
 
     async def _exclude_fields(self, field: str) -> Any:
         return getattr(self.model, field, None)
+
+
+    async def create_many(self, data: List[Dict[str, Any]], check: List[Dict[str, Any]] | None = None):
+        """
+        This method creates multiple records in the database from a list of dictionaries.
+
+        :param data: A list of dictionaries, each representing a record to be created.
+        :type data: List[Dict[str, Any]]
+        :param check: Optional. A list of dictionaries for ensuring no duplicates exist before insertion.
+        :type check: List[Dict[str, Any]] | None
+        :return: A response message with the results of the bulk insert.
+        """
+        try:
+            if check:
+                for condition in check:
+                    query = sa_select(self.model).filter_by(**condition)
+                    result = await self.db.execute(query)
+                    if result.scalars().first():
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"The data for: {', '.join(condition.keys())} already exists in the database"
+                        )
+
+            # Perform a bulk insert
+            query = insert(self.model).values(data)
+            await self.db.execute(query)
+            await self.db.commit()
+
+            return response_message(
+                data=data,
+                doc_length=len(data),
+                error=None,
+                message="Bulk data created successfully",
+                success_status=True
+            )
+        except IntegrityError as e:
+            log.logs.error(f"IntegrityError during bulk insert: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Integrity error: {str(e)}"
+            )
+        except Exception as e:
+            log.logs.error(f"Error creating bulk data: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error occurred: {str(e)}"
+            )

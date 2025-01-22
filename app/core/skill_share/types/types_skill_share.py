@@ -10,12 +10,6 @@ class SkillShareStatusEnum(Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
-class ReviewRatingEnum(Enum):
-    ONE = 1
-    TWO = 2
-    THREE = 3
-    FOUR = 4
-    FIVE = 5
 
 # Type definitions
 class SkillShareRequestT(TypedDict):

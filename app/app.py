@@ -29,7 +29,9 @@ def init_app(init_db=True):
                     from app.core.auth.models.model_token import TokenModel
                     from app.core.skills.models.model_skills import SkillModel
                     from app.core.skills.models.model_available_time import SkillAvailableTimeModel
-                    
+                    from app.core.reviews.model.model_reviews import ReviewModel
+                    from app.core.skill_share.model.ongoing_share_model import OngoingSkillShareModel
+                    from app.core.skill_share.model.skill_share_model import SkillShareRequestModel
                     await session_manager.create_all(connection)
                     # await session_manager.drop_all(connection)
             yield

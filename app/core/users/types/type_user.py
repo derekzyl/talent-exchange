@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+
 from typing import NotRequired, Optional, TypedDict
 
 
@@ -36,6 +37,8 @@ class UserT(TypedDict, ):
     deleted_at: datetime
     created_at: datetime 
     updated_at: datetime 
+    country:str
+    region:str
 
     allow_login: bool
   

@@ -23,6 +23,8 @@ class UserModel(BaseModelClass):
     email:Mapped[str]= mapped_column(String(255), unique=True, nullable=False)
     phone:Mapped[str] = mapped_column(String(255), unique=True, nullable=True)
     language:Mapped[str]= mapped_column(String(255), unique=True, nullable=True)
+    country:Mapped[str]= mapped_column(String(255), nullable=True)
+    region:Mapped[str]= mapped_column(String(255), nullable=True)
 
     
     gender:Mapped[str]=mapped_column(Enum(GenderE), nullable=True)

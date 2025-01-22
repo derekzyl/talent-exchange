@@ -55,8 +55,18 @@ class UserService:
             user = await self.crud_service.get_one(data=data,)
             return user
         except Exception as e:
-            raise HTTPException(status_code=400, detail=response_message(error=e, success_status=False, message="User not found"))
+         raise HTTPException(status_code=400, detail=response_message(error=e, success_status=False, message="User not found"))
+    async def get_users_by_country(self, country: str, filter: dict|None= None):
+        try:
+            query = {"country": country}
+            if filter is None:
+                filter = {}
+            users = await self.crud_service.get_many(query=query, filter=filter)
+            return users
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=response_message(error=e, success_status=False, message="Users not found"))
 
+ 
     async def update_user(self, filter:dict, data:UpdateUserT ):
         d=dict(data)
         try:

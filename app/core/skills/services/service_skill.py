@@ -92,7 +92,7 @@ class SkillService(CrudService):
         try:
             """Get a single skill based on a filter"""
             
-            
+      
             result = await self.get_one(filter)
 
             if 'data' not in result:
@@ -101,12 +101,14 @@ class SkillService(CrudService):
                     detail="Skill not found"
                 )
 
-            convert_data = convert_sqlalchemy_dict(result['data']) if callable(convert_sqlalchemy_dict) else result['data']
+            convert_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(result['data'])
+           
             
             return response_message(
                 data=convert_data,
                 message="Skill retrieved successfully",
-                success_status=True
+                success_status=True,
+                doc_length=1
             )
         except Exception as e:
             raise HTTPException(

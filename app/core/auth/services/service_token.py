@@ -66,7 +66,7 @@ class TokenService:
     async def verify_token(token:str, type:TokenType, db:AsyncSession):
         token_data = jwt.verify_token(token=token)
 
-        print("token_data",token_data)
+  
         
         if isinstance(token_data['sub'], str)==False:
             raise HTTPException(
@@ -83,7 +83,7 @@ class TokenService:
 
             stmt =(update(TokenModel).values(blacklisted=True).where(TokenModel.id == token_data.id))
             await db.execute(stmt)
-            print('token_data',token_data)
+       
             if token_data is None:
                 raise HTTPException(
                     status_code=400,

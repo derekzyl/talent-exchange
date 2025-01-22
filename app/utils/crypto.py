@@ -10,7 +10,7 @@ class EncryptAndCompareData:
     AUTH_SIZE = 64
 
     def sign(self, data: str):
-        print(self.SECRET_KEY)
+
         encode_data = data.encode("utf-8")
         h = blake2b(digest_size=self.AUTH_SIZE, key=self.SECRET_KEY)
 

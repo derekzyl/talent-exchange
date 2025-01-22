@@ -94,11 +94,10 @@ async def change_password(data: ChangePassWordT, db: AsyncSession = Depends(get_
 async def get_all_token(db: AsyncSession = Depends(get_db)):
     user: ResponseMessage = await TokenService(db=db).get_all_tokens()
   
-    d = {} if user['data'] is None else sqlalchemy_obj_to_dict(user['data'])
+    d = {} if 'data' not in user or user['data'] is None else sqlalchemy_obj_to_dict(user['data'])
     if 'data' in user and user['data']:
         d = sqlalchemy_obj_to_dict(user['data'])
-    print('user', user)
-   
+
     return JSONResponse(status_code=status.HTTP_200_OK, content={
         'data': d,
         'doc_length': len(d),

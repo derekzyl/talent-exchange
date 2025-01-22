@@ -33,6 +33,9 @@ class CreateTimeT(TypedDict):
     available_day:str
     start_time:str
     end_time:str
+
+
+    
 class CreateSkillT(TypedDict, ):
     skill_category: str
     skill_name: str
@@ -41,6 +44,16 @@ class CreateSkillT(TypedDict, ):
     available_times: list[CreateTimeT] | None
 
     user_id:str
+
+    
+    
+class CreateNewSkillT(TypedDict, ):
+    skill_category: str
+    skill_name: str
+    skill_description: str
+    skill_level: enum_skill_level
+    available_times: list[CreateTimeT] | None
+
 
     
 

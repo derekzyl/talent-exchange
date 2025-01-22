@@ -44,7 +44,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
             user_service = TokenServic(self.db)
         
             user = await user_service.get_one({"id":token_result}) 
-            print("user home", user)
             if not user or not user.get('data'):
                 return ResponseMessage(
                     data=None, 
@@ -63,7 +62,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        print( "should_skip_auth", request.url.path)
         if self.should_skip_auth(request.url.path):
             return await call_next(request)
 
@@ -118,10 +116,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return response
 
         except HTTPException as exc:
-            print("HTTPException", exc)
             raise exc
         except Exception as e:
-            print("Exception", e)
             raise HTTPException(
                 status_code=500,
                 detail=response_message(

@@ -72,7 +72,6 @@ class AuthService(UserService):
             user = await self.get_user({"email":data['email']})
         else:
             user = await self.get_user({"username":data['email']})
-        print('user',user)        
         if user and user['data'] is None: # type: ignore
             raise HTTPException(status_code=400, detail=response_message(error="login error", success_status=False, message="incorrect username or password"))
 

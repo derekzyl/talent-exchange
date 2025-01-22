@@ -12,6 +12,7 @@ from app.config.database.db import AsyncSession
 from app.core.skills.models.model_skills import SkillModel
 from app.core.skills.models.model_available_time import SkillAvailableTimeModel
 from app.core.skills.services.service_skill_avaialable_time import SkillAvailableTimeService
+from app.utils import convert_sqlalchemy_dict
 from app.utils.crud.service_crud import CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message
 from app.core.skills.types.types_skills  import CreateSkillT, CreateTimeT, SkillT, AvailableTimeT, enum_skill_level
@@ -85,6 +86,36 @@ class SkillService(CrudService):
             message="User skills retrieved successfully",
             success_status=True
         )
+
+
+    async def get_one_skill(self, filter: Dict[str, Any]) -> ResponseMessage:
+        try:
+            """Get a single skill based on a filter"""
+            
+            
+            result = await self.get_one(filter)
+
+            if 'data' not in result:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Skill not found"
+                )
+
+            convert_data = convert_sqlalchemy_dict(result['data']) if callable(convert_sqlalchemy_dict) else result['data']
+            
+            return response_message(
+                data=convert_data,
+                message="Skill retrieved successfully",
+                success_status=True
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(e)
+            )
+
+
+
 
     async def search_skills(
         self, 

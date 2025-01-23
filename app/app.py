@@ -20,6 +20,7 @@ def init_app(init_db=True):
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
+    "http://localhost:5150",
 ]      
     app.add_middleware(
     CORSMiddleware,

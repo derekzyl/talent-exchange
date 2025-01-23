@@ -137,6 +137,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/api/v1/auth/get-all-token",
             "/api/v1/auth/signup",
             "/auth/register",
+            '/'
             
             
         }

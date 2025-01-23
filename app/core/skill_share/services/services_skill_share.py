@@ -13,6 +13,7 @@ from datetime import datetime
 from app.config.database.db import AsyncSession
 from app.core.skills.models.model_skills import SkillModel
 from app.core.skills.models.model_available_time import SkillAvailableTimeModel
+from app.core.skills.services.service_skill import SkillService
 from app.core.skills.services.service_skill_avaialable_time import SkillAvailableTimeService
 from app.utils import convert_sqlalchemy_dict
 from app.utils.crud.service_crud import CrudService
@@ -46,6 +47,15 @@ class SkillShareService(CrudService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A pending request already exists"
             )
+
+        skills = SkillService(self.db)   
+        requester_skill = await skills.get_one({"user_id": data['requester_skill_id']})
+        provider_skill = await skills.get_one({"user_id": data['provider_skill_id']})
+        
+        
+
+         
+         
 
         return await self.create(data) # type: ignore
 

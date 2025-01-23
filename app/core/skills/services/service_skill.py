@@ -12,6 +12,7 @@ from app.config.database.db import AsyncSession
 from app.core.skills.models.model_skills import SkillModel
 from app.core.skills.models.model_available_time import SkillAvailableTimeModel
 from app.core.skills.services.service_skill_avaialable_time import SkillAvailableTimeService
+from app.core.users.models.model_user import UserModel
 from app.utils import convert_sqlalchemy_dict
 from app.utils.crud.service_crud import CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message
@@ -119,14 +120,57 @@ class SkillService(CrudService):
 
 
 
+    # async def search_skills(
+    #     self, 
+    #     skill_name: Optional[str] = None,
+    #     skill_category: Optional[str] = None,
+    #     skill_level: Optional[enum_skill_level] = None
+    # ) -> ResponseMessage:
+    #     """Search skills based on various criteria"""
+    #     filters = []
+    #     if skill_name:
+    #         filters.append(self.model.skill_name.ilike(f"%{skill_name}%")) # type: ignore
+    #     if skill_category:
+    #         filters.append(self.model.skill_category == skill_category) # type: ignore
+    #     if skill_level:
+    #         filters.append(self.model.skill_level == skill_level) # type: ignore
+
+    #     query = select(self.model).filter(
+    #         and_(
+    #             *filters,
+    #             self.model.deleted_at.is_(None) # type: ignore
+    #         )
+    #     )
+        
+    #     result = await self.db.execute(query)
+    #     skills = result.scalars().all()
+        
+    #     return response_message(
+    #         data=skills,
+    #         doc_length=len(skills) if skills else 0,
+    #         message="Skills search completed",
+    #         success_status=True
+    #     )
+
+
+
+
+
+
     async def search_skills(
-        self, 
+        self,
+        user_country: str,
+        user_region: str,
         skill_name: Optional[str] = None,
         skill_category: Optional[str] = None,
         skill_level: Optional[enum_skill_level] = None
     ) -> ResponseMessage:
-        """Search skills based on various criteria"""
-        filters = []
+        filters = [
+            self.model.deleted_at.is_(None), # type: ignore
+            UserModel.country == user_country,
+            UserModel.region == user_region
+        ]
+        
         if skill_name:
             filters.append(self.model.skill_name.ilike(f"%{skill_name}%")) # type: ignore
         if skill_category:
@@ -134,11 +178,10 @@ class SkillService(CrudService):
         if skill_level:
             filters.append(self.model.skill_level == skill_level) # type: ignore
 
-        query = select(self.model).filter(
-            and_(
-                *filters,
-                self.model.deleted_at.is_(None) # type: ignore
-            )
+        query = (
+            select(self.model)
+            .join(UserModel, self.model.user_id == UserModel.id) # type: ignore
+            .filter(and_(*filters))
         )
         
         result = await self.db.execute(query)
@@ -146,11 +189,11 @@ class SkillService(CrudService):
         
         return response_message(
             data=skills,
-            doc_length=len(skills) if skills else 0,
-            message="Skills search completed",
-            success_status=True
+            doc_length=len(skills),
+            success_status=True,
+            message="Skills search completed"
+            
         )
-
     async def get_skills_by_category(self, category: str) -> ResponseMessage:
         """Get all skills in a specific category"""
         query = select(self.model).filter(

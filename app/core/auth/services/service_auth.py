@@ -102,7 +102,7 @@ class AuthService(UserService):
            
             raise HTTPException(status_code=400, detail=response_message(error="user not found", success_status=False, message="user not found"))
         
-        get_token =await verify_otp_token(db=self.db, user_id=get_user['data']["id"], token= data['token'], type=TokenType.RESET_PASSWORD,) # type: ignore
+        get_token =await TokenService.verify_otp_token(db=self.db, user_id=get_user['data']["id"], token= data['token'], type=TokenType.RESET_PASSWORD,) # type: ignore
 
         if get_token is not None:
             stmt= update(UserModel).where(UserModel.id == get_user['data']["id"]).values(password=password_hash.PassHash().hash_me(data['password'])) # type: ignore
@@ -126,7 +126,7 @@ class AuthService(UserService):
             await mail.sendmail()
         return response_message(success_status=True, message="email sent successfully", data="verification email sent")
   
-    async def change_password(self, data:ChangePassWordT):
+    async def change_password(self, data:dict):
         user = await self.get_user_by_id(data["user_id"])
         
         if user["data"] is None: # type: ignore
@@ -147,13 +147,13 @@ class AuthService(UserService):
         if 'data' in user and user['data'] is None: # type: ignore
             raise HTTPException(status_code=400, detail=response_message(error="email sent successfully", success_status=False, message="if you have an account, an email has been sent to you to proceed with reset password"))
 
-        token = generate_token(user_id=user['data']["id"], expires_in=30,  token_type=TokenType.RESET_PASSWORD) # type: ignore
+        token = TokenService.generate_token(user_id=user['data']["id"], expires_in=30,  token_type=TokenType.RESET_PASSWORD) # type: ignore
 
         
         
 
         if env.env["mail"]["use_mail_service"] is True:
-            mail =Mailer(background=True,background_tasks=background_task, body={"website_name":"medic", "expiry_time": 30, 'otp':token}, html_template='verification/rest_password', receiver_email=user["data"]['email'], subject='chenge password') # type: ignore
+            mail =Mailer(background=True,background_tasks=background_task, body={"website_name":"medic", "expiry_time": 30, 'otp':token}, html_template='verification/rest_password', receiver_email=user["data"]['email'], subject='change password')  # type: ignore
 
             await mail.sendmail()
         return response_message(success_status=True, message="email sent successfully", data="if you have an account, an email has been sent to you to proceed with reset password")    

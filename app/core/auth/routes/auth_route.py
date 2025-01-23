@@ -1,6 +1,6 @@
 from tokenize import Token
 import typing
-from typing import Annotated
+from typing import Annotated, TypedDict
 
 from fastapi import APIRouter, BackgroundTasks, Body, Depends, status
 from fastapi.encoders import jsonable_encoder
@@ -13,7 +13,7 @@ from app.core.auth.services.service_token import TokenService
 from app.core.auth.types.types_auth import ChangePassWordT
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import (CreateUserD, CreateUserT,
-                                            ForgotPasswordT, LoginUserT)
+                                            ForgotPasswordT, LoginUserT, UserT)
 from app.utils.convert_sqlalchemy_dict import sqlalchemy_obj_to_dict
 from app.utils.crud.types_crud import ResponseMessage
 from app.utils.logger import log
@@ -50,7 +50,8 @@ async def logout_user(data:Annotated[CreateUserD, Body()], db:AsyncSession=Depen
 
 
 @auth_router.post("/forgot-password", name="AUTH API")
-async def forgot_password(data:Annotated[ForgotPasswordT, Body()],background_tasks:BackgroundTasks, db:AsyncSession=Depends(get_db)):
+async def forgot_password(data:Annotated[ForgotPasswordT, Body()],
+                          background_tasks:BackgroundTasks, db:AsyncSession=Depends(get_db)):
     user = AuthService(db=db)
     forgot_password = await user.forgot_password(data={**data}, background_task=background_tasks)
     log.logs.info(f' forgot password {forgot_password}')
@@ -58,10 +59,18 @@ async def forgot_password(data:Annotated[ForgotPasswordT, Body()],background_tas
     return JSONResponse(status_code=status.HTTP_200_OK, content=json)
 
 
+
+class reset_pass(TypedDict):
+    token:str
+    password:str
+    
+    
+    
+
 @auth_router.post("/reset-password", name="AUTH API", summary="Reset user password")
-async def reset_password(data: dict, db: AsyncSession = Depends(get_db)):
+async def reset_password(data: reset_pass, db: AsyncSession = Depends(get_db)):
     user = AuthService(db=db)
-    reset_password = await user.reset_password(data=data)
+    reset_password = await user.reset_password(data=data) # type: ignore
     log.logs.info(f'Password reset: {reset_password}')
     json = jsonable_encoder(reset_password)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json)
@@ -83,24 +92,14 @@ async def send_email_verification(data: dict, background_tasks: BackgroundTasks,
     return JSONResponse(status_code=status.HTTP_200_OK, content=json)
 
 @auth_router.post("/change-password", name="AUTH API", summary="Change user password")
-async def change_password(data: ChangePassWordT, db: AsyncSession = Depends(get_db)):
+async def change_password(data: ChangePassWordT,
+ user_id: Annotated[UserT, Depends(UserService.get_logged_in_user)],
+
+
+                          db: AsyncSession = Depends(get_db)):
     user = AuthService(db=db)
-    change_password = await user.change_password(data=data)
+    change_password = await user.change_password(data={**data, 'user_id':user_id['id']})
     log.logs.info(f'Password changed: {change_password}')
     json = jsonable_encoder(change_password)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json)
 
-@auth_router.get("/get-all-token", name="AUTH API", summary="tokens check")
-async def get_all_token(db: AsyncSession = Depends(get_db)):
-    user: ResponseMessage = await TokenService(db=db).get_all_tokens()
-  
-    d = {} if 'data' not in user or user['data'] is None else sqlalchemy_obj_to_dict(user['data'])
-    if 'data' in user and user['data']:
-        d = sqlalchemy_obj_to_dict(user['data'])
-
-    return JSONResponse(status_code=status.HTTP_200_OK, content={
-        'data': d,
-        'doc_length': len(d),
-        'message': 'Token retrieved',
-        'success_status': True
-    })

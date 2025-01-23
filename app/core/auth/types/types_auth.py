@@ -10,4 +10,4 @@ class ChangePassWordT(TypedDict):
     old_password:str
     new_password:str
     confirm_password:str
-    user_id:str
+  

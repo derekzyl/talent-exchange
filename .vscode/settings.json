@@ -1,3 +1,4 @@
 {
-    "docwriter.hotkey.mac": "⌥ + ."
+    "docwriter.hotkey.mac": "⌘ + .",
+    "docwriter.style": "Auto-detect"
 }

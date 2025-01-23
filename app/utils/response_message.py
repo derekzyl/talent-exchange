@@ -5,6 +5,14 @@ from utils.types_utils.response_types import ResponseMessageT, ResponseT
 
 
 def responseMessage(data: ResponseT) -> ResponseMessageT:
+    """
+    The function responseMessage returns a response message based on the success status in the input
+    data.
+    
+    :param data: The `responseMessage` function takes a dictionary `data` as input, which is expected to
+    have the following keys:
+    :type data: ResponseT
+    """
     match (data["success_status"]):
         case True:
             return {

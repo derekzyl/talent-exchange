@@ -4,6 +4,8 @@ from typing import (Any, Awaitable, Callable, Dict, Type, TypedDict, TypeVar,
 from pydantic import BaseModel, create_model
 
 
+# The `PydanticUtil` class provides utility methods for working with Pydantic BaseModel classes, such
+# as creating partial models, handling required fields, picking specific fields, and more.
 class PydanticUtil:
     BaseModelType = type[BaseModel]
     Keys = TypeVar("Keys")

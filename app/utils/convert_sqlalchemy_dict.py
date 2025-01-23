@@ -2,8 +2,18 @@ from datetime import datetime, date
 
 def sqlalchemy_obj_to_dict(obj):
     """
-    Convert SQLAlchemy object(s) to dictionary/list format with datetime handling.
+    The function `sqlalchemy_obj_to_dict` converts SQLAlchemy objects into dictionaries, handling
+    various data types and structures.
+    
+    :param obj: The function `sqlalchemy_obj_to_dict` is designed to convert SQLAlchemy objects into
+    dictionaries. It handles various scenarios such as handling None values, datetime objects, lists of
+    objects, dictionaries containing SQLAlchemy objects, and single SQLAlchemy objects
+    :return: The function `sqlalchemy_obj_to_dict` takes an SQLAlchemy object as input and converts it
+    into a dictionary representation. The function handles various cases such as None values, datetime
+    objects, lists of objects, dictionaries containing SQLAlchemy objects, and single SQLAlchemy
+    objects.
     """
+ 
     # Handle None
     if obj is None:
         return None

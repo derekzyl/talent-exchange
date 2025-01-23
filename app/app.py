@@ -6,13 +6,28 @@ from app.config.database.db import get_db, session_manager
 from app.config.env import env
 from app.core.auth.services.middleware_auth import AuthMiddleware
 from app.versions.route_handler import handle_routing
+from fastapi.middleware.cors import CORSMiddleware
 
 
 def init_app(init_db=True):
     
 
      
-    app:FastAPI = FastAPI(title="Skill Share App")       
+    app:FastAPI = FastAPI(title="Skill Share App") 
+    origins = [
+    '*',
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]      
+    app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
       # Add middleware before the lifespan context
     app.add_middleware(AuthMiddleware, db_session=session_manager) 
 

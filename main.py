@@ -16,4 +16,4 @@ app = init_app()
 
 @app.get('/')
 async def root():
-    return JSONResponse(status_code=status.HTTP_200_OK, content = response_message(data="welcome to medic project", success_status=True, message="success"))
+    return JSONResponse(status_code=status.HTTP_200_OK, content = response_message(data="welcome to skill share  project", success_status=True, message="success"))

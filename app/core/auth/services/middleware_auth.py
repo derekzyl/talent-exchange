@@ -119,11 +119,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
             raise exc
         except Exception as e:
             raise HTTPException(
-                status_code=500,
+                status_code=400,
                 detail=response_message(
                     error=str(e),
                     success_status=False,
-                    message="Internal server error"
+                    message="response error"
                 )
             )
 

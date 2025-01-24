@@ -48,7 +48,9 @@ class CreateUserT(TypedDict ):
 
     first_name: str
     last_name: str
-
+    
+    country:str
+    region:str
     email: str
     password: str
 class LoginUserT(TypedDict ):

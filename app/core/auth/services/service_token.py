@@ -103,7 +103,6 @@ class TokenService:
     async def verify_jwt_token(token:str):
         token_data = jwt.verify_token(token=token)
 
-        print("token_data",token_data)
         
         if isinstance(token_data['sub'], str)==False:
             raise HTTPException(

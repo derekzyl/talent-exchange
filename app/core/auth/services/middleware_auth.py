@@ -65,10 +65,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         if self.should_skip_auth(request.url.path):
-            print("Skipping auth")
+            
             return await call_next(request)
 
-        print("auth_header", request.headers.get("Authorization"))
         try:
             auth_header = request.headers.get("Authorization")
             if not auth_header:
@@ -176,6 +175,8 @@ class UserServices:
 
                 # Convert to dict for JSON serialization
                 result_dict = sqlalchemy_obj_to_dict(db_item_selected)
+                if isinstance(result_dict, dict) and "password" in result_dict:
+                    del result_dict["password"]
                 
                 return response_message(
                     data=result_dict, 

@@ -53,6 +53,10 @@ class AuthService(UserService):
             token = await TokenService.generate_auth_token(db_user.id, db=self.db )
             
             d = sqlalchemy_obj_to_dict(db_user)
+            if isinstance(d, dict):
+                d.pop('password', None)
+            else:
+                del d.password    # type: ignore
             
             
             return {'user':d,
@@ -81,6 +85,7 @@ class AuthService(UserService):
             raise HTTPException(status_code=400, detail=response_message(error="login error", success_status=False, message="incorrect username or password"))
 
         db_user =user['data'][0] # type: ignore
+        
 
  
         

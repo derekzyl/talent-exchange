@@ -55,7 +55,6 @@ class MyJwt:
         :return: A dictionary containing the decoded token is being returned.
         """
         decoded_token = jwt.decode(token=token, key=self.JWT_SECRET)
-        print("decoded_token", decoded_token)
         return decoded_token
 
 

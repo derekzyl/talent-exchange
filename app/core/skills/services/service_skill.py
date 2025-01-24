@@ -87,7 +87,20 @@ class SkillService(CrudService):
             message="User skills retrieved successfully",
             success_status=True
         )
-
+    async def get_all_skills(self) -> ResponseMessage:
+        """Get all skills"""
+        query = select(self.model).filter(
+            self.model.deleted_at.is_(None) # type: ignore
+        )
+        result = await self.db.execute(query)
+        skills = result.scalars().all()
+        
+        return response_message(
+            data=skills,
+            doc_length=len(skills) if skills else 0,
+            message="All skills retrieved successfully",
+            success_status=True
+        )
 
     async def get_one_skill(self, filter: Dict[str, Any]) -> ResponseMessage:
         try:
@@ -116,42 +129,6 @@ class SkillService(CrudService):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=str(e)
             )
-
-
-
-
-    # async def search_skills(
-    #     self, 
-    #     skill_name: Optional[str] = None,
-    #     skill_category: Optional[str] = None,
-    #     skill_level: Optional[enum_skill_level] = None
-    # ) -> ResponseMessage:
-    #     """Search skills based on various criteria"""
-    #     filters = []
-    #     if skill_name:
-    #         filters.append(self.model.skill_name.ilike(f"%{skill_name}%")) # type: ignore
-    #     if skill_category:
-    #         filters.append(self.model.skill_category == skill_category) # type: ignore
-    #     if skill_level:
-    #         filters.append(self.model.skill_level == skill_level) # type: ignore
-
-    #     query = select(self.model).filter(
-    #         and_(
-    #             *filters,
-    #             self.model.deleted_at.is_(None) # type: ignore
-    #         )
-    #     )
-        
-    #     result = await self.db.execute(query)
-    #     skills = result.scalars().all()
-        
-    #     return response_message(
-    #         data=skills,
-    #         doc_length=len(skills) if skills else 0,
-    #         message="Skills search completed",
-    #         success_status=True
-    #     )
-
 
 
 

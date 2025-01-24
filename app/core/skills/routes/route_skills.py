@@ -45,15 +45,17 @@ async def get_skill_by_id(
     skill_service = SkillService(db)
     return await skill_service.get_one_skill({'id':skill_id, 'user_id':user_id['id']})
 
-@skill_router.get("/search")
+@skill_router.get("/search/q")
 async def search_skills(
     db: Annotated[AsyncSession, Depends(get_db)],
+    user:Annotated [UserT, Depends(UserService.get_logged_in_user)],
     skill_name: Optional[str] = None,
     skill_category: Optional[str] = None,
     skill_level: Optional[enum_skill_level] = None,
 ):
     skill_service = SkillService(db)
-    return await skill_service.search_skills(skill_name, skill_category, skill_level)
+    print(skill_name, skill_category, skill_level)
+    return await skill_service.search_skills(user_country=user["country"], user_region=user["region"], skill_level=skill_level, skill_name=skill_name, skill_category=skill_category)
 
 @skill_router.get("/category/{category}")
 async def get_skills_by_category(

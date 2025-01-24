@@ -153,7 +153,7 @@ class SkillService(CrudService):
         if skill_category:
             filters.append(self.model.skill_category == skill_category) # type: ignore
         if skill_level:
-            filters.append(self.model.skill_level == skill_level) # type: ignore
+            filters.append(self.model.skill_level == skill_level.value) # type: ignore
 
         query = (
             select(self.model)

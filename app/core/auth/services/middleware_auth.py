@@ -31,6 +31,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         try:
             
             token_result: str = await self.token_service.verify_jwt_token(token=token )
+       
             
             if not token_result:
                 return ResponseMessage(
@@ -41,7 +42,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     success_status=False
                 )
             
-            user_service = TokenServic(self.db)
+            user_service = UserServices(self.db)
         
             user = await user_service.get_one({"id":token_result}) 
             if not user or not user.get('data'):
@@ -55,6 +56,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 
             return user
         except Exception as e:
+            print("error", e)
    
             log.logs.error(f"Error getting user: {e}")
             return None
@@ -63,8 +65,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         if self.should_skip_auth(request.url.path):
+            print("Skipping auth")
             return await call_next(request)
 
+        print("auth_header", request.headers.get("Authorization"))
         try:
             auth_header = request.headers.get("Authorization")
             if not auth_header:
@@ -134,17 +138,17 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/redoc",
             "/openapi.json",
             "/api/v1/auth/login",
-            "/api/v1/auth/get-all-token",
+      
             "/api/v1/auth/signup",
             "/auth/register",
-            '/'
+            
             
             
         }
         return any(path.startswith(public_path) for public_path in public_paths)
 
 
-class TokenServic:
+class UserServices:
     def __init__(self, db: DatabaseSessionManager):
         self.db = db
         self.model = UserModel

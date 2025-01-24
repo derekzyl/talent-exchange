@@ -78,6 +78,7 @@ class UserService:
 
     @staticmethod
     def get_logged_in_user(request:Request):
+  
         user = getattr(request.state, "user", None)
         
         if not user:

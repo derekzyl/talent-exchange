@@ -31,7 +31,7 @@ async def get_user_skills(
 ):
     skill_service = SkillService(db)
     return await skill_service.get_user_skills(user_id['id'])
-@skill_router.get("/all")
+@skill_router.get("/search/all")
 async def get_all_skills(
     db: Annotated[AsyncSession, Depends(get_db)],
 ):

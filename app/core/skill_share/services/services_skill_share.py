@@ -85,5 +85,5 @@ class SkillShareService(CrudService):
 
         return await self.update(
             filter={"id": request_id},
-            data={"status": new_status}
+            data={"status": new_status.value}
         )

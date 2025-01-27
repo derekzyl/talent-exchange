@@ -1,4 +1,5 @@
 # routes/skill_share.py
+import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +10,9 @@ from app.core.skill_share.services.services_skill_share import SkillShareService
 from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, SkillShareStatusEnum
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import UserT
-from app.utils.crud.types_crud import ResponseMessage
+from app.utils import convert_sqlalchemy_dict
+from app.utils.crud.types_crud import ResponseMessage, response_message
+
 
 
 
@@ -37,11 +40,19 @@ async def get_sent_requests(
 ):
     """Get all skill share requests sent by the current user"""
     service = SkillShareService(db)
-    return await service.get_many(
+    data= await service.get_many(
         query={},
         filter={"requester_id": current_user["id"]}
     )
-
+    converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(data)
+    return response_message(
+        data=converter,
+        message="Skill share sent requests gotten  successfully",
+        
+        doc_length=len(converter) if converter else 0,
+        success_status=True
+        
+    )
 @skill_share_router.get("/requests/received", response_model=ResponseMessage)
 async def get_received_requests(
     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
@@ -49,6 +60,7 @@ async def get_received_requests(
 ):
     """Get all skill share requests received by the current user"""
     service = SkillShareService(db)
+    
     return await service.get_many(
         query={},
         filter={"provider_id": current_user["id"]}

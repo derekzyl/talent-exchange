@@ -44,13 +44,15 @@ async def get_sent_requests(
         query={},
         filter={"requester_id": current_user["id"]}
     )
-    converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(data)
+    if data.get('data') is None:
+        raise HTTPException(status_code=404, detail="No requests found")    
+    converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(data['data'])
     return response_message(
         data=converter,
-        message="Skill share sent requests gotten  successfully",
+        message=data.get("message", ""),
         
         doc_length=len(converter) if converter else 0,
-        success_status=True
+        success_status=data.get("success_status", False)
         
     )
 @skill_share_router.get("/requests/received", response_model=ResponseMessage)

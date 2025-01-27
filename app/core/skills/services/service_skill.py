@@ -94,10 +94,12 @@ class SkillService(CrudService):
         )
         result = await self.db.execute(query)
         skills = result.scalars().all()
+
+        converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(skills)
         
         return response_message(
-            data=skills,
-            doc_length=len(skills) if skills else 0,
+            data=converter,
+            doc_length=len(converter) if converter else 0,
             message="All skills retrieved successfully",
             success_status=True
         )

@@ -55,9 +55,14 @@ class SkillShareService(CrudService):
         
 
          
-         
+        skill_user =await  self.create(data) # type: ignore
+        converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(skill_user)
 
-        return await self.create(data) # type: ignore
+        return  response_message(
+            data=converter,
+            message="Skill share request created successfully",
+            success_status=True
+        )
 
     async def update_share_request_status(
         self,

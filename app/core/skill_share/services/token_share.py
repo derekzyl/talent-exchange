@@ -5,6 +5,7 @@ from app.config.database.db import AsyncSession
 from app.core.skill_share.model.skill_share_model import SkillShareRequestModel
 from app.core.skill_share.model.skill_share_token import TokenSkillModel, TokenSkillTransactionModel
 
+from app.core.skill_share.services.services_skill_share import SkillShareService
 from app.utils import convert_sqlalchemy_dict
 from app.utils.crud.service_crud import CrudService
 from app.utils.crud.types_crud import ResponseMessage, response_message

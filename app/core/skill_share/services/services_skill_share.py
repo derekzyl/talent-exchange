@@ -3,7 +3,7 @@
 from xdrlib import ConversionError
 from app.config.database.db import AsyncSession
 from app.core.skill_share.model.skill_share_model import SkillShareRequestModel
-from app.core.skill_share.services.service_exhange import OngoingSkillShareService
+# import app.core.skill_share.services.service_exhange
 from app.core.skill_share.services.token_share import TokenSkillService
 from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, SkillShareStatusEnum
 from app.core.skills.models.model_skills import SkillModel 
@@ -128,14 +128,14 @@ class SkillShareService(CrudService):
         )
         reponse_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(updated_request['data'])
 
-        if new_status == SkillShareStatusEnum.ACCEPTED:
-            ongoing_service = OngoingSkillShareService(self.db)
-            await ongoing_service.create_ongoing_share(
-                skill_share_id=request_id,
-                start_date=datetime.utcnow(),
-                end_date=datetime.utcnow() + timedelta(days=30),  # Example duration
-                notes=None
-        )
+        # if new_status == SkillShareStatusEnum.ACCEPTED:
+        #     ongoing_service = app.core.skill_share.services.service_exhange.OngoingSkillShareService(self.db)
+        #     await ongoing_service.create_ongoing_share(
+        #         skill_share_id=request_id,
+        #         start_date=datetime.utcnow(),
+        #         end_date=datetime.utcnow() + timedelta(days=30),  # Example duration
+        #         notes=None
+        # )
 
         return response_message(
             data=reponse_data,

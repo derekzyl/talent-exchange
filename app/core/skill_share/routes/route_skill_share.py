@@ -7,7 +7,7 @@ from datetime import datetime
 
 from app.config.database.db import get_db
 from app.core.skill_share.services.services_skill_share import SkillShareService
-from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, SkillShareStatusEnum
+from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, IncomingCreateSkillShareRequestT, SkillShareStatusEnum
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import UserT
 from app.utils import convert_sqlalchemy_dict
@@ -24,7 +24,7 @@ skill_share_router = APIRouter()
 # Skill Share Request Routes
 @skill_share_router.post("/request", response_model=ResponseMessage)
 async def create_skill_share_request(
-    request_data: CreateSkillShareRequestT,
+    request_data: IncomingCreateSkillShareRequestT,
     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):

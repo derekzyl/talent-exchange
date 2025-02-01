@@ -10,7 +10,7 @@ class SkillShareRequestModel(BaseModelClass):
 
     requester_id: Mapped[str] = mapped_column(ForeignKey("USER.id"))
     provider_id: Mapped[str] = mapped_column(ForeignKey("USER.id"))
-    requester_skill_id: Mapped[str] = mapped_column(ForeignKey("SKILLS.id"))
+    requester_skill_id: Mapped[str] = mapped_column(ForeignKey("SKILLS.id"), nullable=True)
     provider_skill_id: Mapped[str] = mapped_column(ForeignKey("SKILLS.id"))
     status = mapped_column(String, default=SkillShareStatusEnum.PENDING.value)
     message = mapped_column(Text, nullable=True)

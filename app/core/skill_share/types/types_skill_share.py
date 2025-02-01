@@ -30,6 +30,11 @@ class CreateSkillShareRequestT(TypedDict):
     requester_skill_id: str
     provider_skill_id: str
     message: str
+class IncomingCreateSkillShareRequestT(TypedDict, total=False):
+    provider_id: str
+    requester_skill_id: Optional[str]
+    provider_skill_id: str
+    message: str
 
 class OngoingSkillShareT(TypedDict):
     id: str

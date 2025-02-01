@@ -56,12 +56,22 @@ class SkillShareService(CrudService):
 
          
         skill_user =await  self.create(data) # type: ignore
-        converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(skill_user)
+        if not skill_user.get('data'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Skill share request could not be created"
+            )
+        if 'data' not in skill_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Skill share request could not be created"
+            )
+        converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(skill_user["data"])
 
         return  response_message(
             data=converter,
-            message="Skill share request created successfully",
-            success_status=True
+            message=skill_user.get("message", ""),
+            success_status=skill_user.get("success_status", False),
         )
 
     async def update_share_request_status(

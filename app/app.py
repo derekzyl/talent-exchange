@@ -48,6 +48,8 @@ def init_app(init_db=True):
                     from app.core.reviews.model.model_reviews import ReviewModel
                     from app.core.skill_share.model.ongoing_share_model import OngoingSkillShareModel
                     from app.core.skill_share.model.skill_share_model import SkillShareRequestModel
+                    from app.core.skill_share.model.skill_share_token import TokenSkillModel, TokenSkillTransactionModel
+                
                     await session_manager.create_all(connection)
                     # await session_manager.drop_all(connection)
             yield

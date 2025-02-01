@@ -1,9 +1,11 @@
 
 
+from xdrlib import ConversionError
 from app.config.database.db import AsyncSession
 from app.core.skill_share.model.skill_share_model import SkillShareRequestModel
+from app.core.skill_share.services.token_share import TokenSkillService
 from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, SkillShareStatusEnum
-from app.core.skills.models.model_skills import SkillModel
+from app.core.skills.models.model_skills import SkillModel 
 from typing import List, Dict, Any, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.future import select
@@ -24,6 +26,7 @@ from app.core.skills.types.types_skills  import CreateSkillT, CreateTimeT, Skill
 class SkillShareService(CrudService):
     def __init__(self, db: AsyncSession):
         super().__init__(model=SkillShareRequestModel, db=db) # type: ignore
+        self.token_service = TokenSkillService(db)
 
     async def create_share_request(self, data: CreateSkillShareRequestT) -> ResponseMessage:
         # Verify users and skills exist
@@ -56,6 +59,10 @@ class SkillShareService(CrudService):
 
          
         skill_user =await  self.create(data) # type: ignore
+
+        
+
+        
         if not skill_user.get('data'):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -67,12 +74,24 @@ class SkillShareService(CrudService):
                 detail="Skill share request could not be created"
             )
         converter = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(skill_user["data"])
-
+        # Process token payment if no requester skill
+        if not data.get('requester_skill_id'):
+            try:
+                await self.token_service.process_skill_share_token(
+                    requester_id=data['requester_id'],
+                    skill_share_request_id=skill_user['data'].id
+                )
+            except HTTPException as e:
+                # Rollback the skill share request if token processing fails
+                await self.delete({"id": skill_user['data'].id})
+                raise e
+    
         return  response_message(
             data=converter,
             message=skill_user.get("message", ""),
             success_status=skill_user.get("success_status", False),
         )
+
 
     async def update_share_request_status(
         self,
@@ -87,10 +106,19 @@ class SkillShareService(CrudService):
                 detail="Share request not found"
             )
 
-        if 'data' not in request or request['data'] is None or request['data'].provider_id != user_id:
+        request_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(request['data'])
+        if not request_data or request_data.get('provider_id') != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only the provider can update the request status"
+            )
+
+        # Handle token refund for cancelled requests
+        if (new_status == SkillShareStatusEnum.CANCELLED or 
+            new_status == SkillShareStatusEnum.REJECTED) and not request_data.get('requester_skill_id'):
+            await self.token_service.refund_tokens(
+                requester_id=request_data.get('requester_id'),
+                skill_share_request_id=request_id
             )
 
         return await self.update(

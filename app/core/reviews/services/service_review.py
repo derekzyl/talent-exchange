@@ -53,4 +53,11 @@ class ReviewService(CrudService):
                 detail="Review already exists"
             )
 
-        return await self.create(data) # type: ignore
+        rev =  await self.create(data) # type: ignore
+
+        data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(rev['data']) # type: ignore
+        return response_message(
+            data=data,
+            message=rev.get("message", ""),
+            success_status=rev.get("success_status", False)
+        )

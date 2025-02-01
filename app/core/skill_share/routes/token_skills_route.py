@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
+from typing import Annotated, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database.db import get_db
@@ -22,14 +22,13 @@ async def get_token_balance(
 
 @token_router.post("/purchase", response_model=ResponseMessage)
 async def purchase_tokens(
-    purchase_data: TokenPurchaseT,
+    purchase_data: Any,
     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
     """Purchase tokens"""
     service = TokenSkillService(db)
-    return await service.purchase_tokens(
-        user_id=current_user["id"],
+    return await service.purchase_tokens(mc      user_id=current_user["id"],
         amount=purchase_data.amount,
         payment_method=purchase_data.payment_method,
         currency=purchase_data.currency
@@ -37,7 +36,7 @@ async def purchase_tokens(
 
 @token_router.post("/transfer", response_model=ResponseMessage)
 async def transfer_tokens(
-    transfer_data: TokenTransferT,
+    transfer_data: Any,
     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):

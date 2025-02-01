@@ -67,6 +67,17 @@ async def get_received_requests(
         query={},
         filter={"provider_id": current_user["id"]}
     )
+   
+    if re.get('data') is None:
+        raise HTTPException(status_code=404, detail=
+response_message(
+        error= getattr(re, "error", None),
+        message=re.get("message", ""),
+        doc_length=0,
+        success_status=re.get("success_status", False)
+    )
+        )
+                            
     convert = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(re['data'])
     return response_message(
         data=convert,

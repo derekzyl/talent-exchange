@@ -63,9 +63,16 @@ async def get_received_requests(
     """Get all skill share requests received by the current user"""
     service = SkillShareService(db)
     
-    return await service.get_many(
+    re= await service.get_many(
         query={},
         filter={"provider_id": current_user["id"]}
+    )
+    convert = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(re['data'])
+    return response_message(
+        data=convert,
+        message=re.get("message", ""),
+        doc_length=len(convert) if convert else 0,
+        success_status=re.get("success_status", False)
     )
 
 @skill_share_router.patch("/request/{request_id}/status", response_model=ResponseMessage)

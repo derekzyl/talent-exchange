@@ -6,7 +6,9 @@ from app.config.database.db import get_db
 from app.core.skill_share.services.token_share.token_share import TokenSkillService
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import UserT
-from app.utils.crud.service_crud import ResponseMessage
+from app.utils import convert_sqlalchemy_dict
+from app.utils.crud.service_crud import ResponseMessage, response_message
+
 
 skill_token_router = APIRouter()
 
@@ -18,8 +20,10 @@ async def get_token_balance(
 ):
     """Get the token balance for the current user"""
     service = TokenSkillService(db)
-    return await service.get_or_create_user_token(current_user["id"])
-
+    convert= await service.get_or_create_user_token(current_user["id"])
+    data = convert.get('data') if convert.get('data') else {}
+    convert_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(data)
+    return response_message(data=convert_data, message=convert.get("message", ""), doc_length=len(convert_data) if convert_data else 0, success_status=convert.get("success_status", False))
 @skill_token_router.post("/purchase", response_model=ResponseMessage)
 async def purchase_tokens(
     purchase_data: Any,

@@ -309,31 +309,32 @@ class TokenSkillService(CrudService):
             success_status=True
         )
 
-    # async def process_refund(
-    #     self,
-    #     user_id: str,
-    #     skill_share_id: str
-    # ) -> ResponseMessage:
-    #     # This is a manual refund endpoint, separate from the automatic refund in update_share_request_status
-    #     # First verify the skill share request exists and belongs to the user
-    #     share_service = SkillShareService(self.db)
-    #     share_request = await share_service.get_one({"id": skill_share_id})
+    async def process_refund(
+        self,
+        user_id: str,
+        skill_share_id: str
+    ) -> ResponseMessage:
+        # This is a manual refund endpoint, separate from the automatic refund in update_share_request_status
+        # First verify the skill share request exists and belongs to the user
+        from app.core.skill_share.services.skill_share.s_skill_share import SkillShareService
+        share_service = SkillShareService(self.db)
+        share_request = await share_service.get_one({"id": skill_share_id})
         
-    #     if not share_request.get('data'):
-    #         raise HTTPException(
-    #             status_code=status.HTTP_404_NOT_FOUND,
-    #             detail="Skill share request not found"
-    #         )
+        if not share_request.get('data'):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Skill share request not found"
+            )
 
-    #     share_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(share_request['data'])
-    #     if not share_data or share_data.get('requester_id') != user_id:
-    #         raise HTTPException(
-    #             status_code=status.HTTP_403_FORBIDDEN,
-    #             detail="Not authorized to refund this request"
-    #         )
+        share_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(share_request['data'])
+        if not share_data or share_data.get('requester_id') != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to refund this request"
+            )
 
-    #     # Process the refund
-    #     return await self.refund_tokens(
-    #         requester_id=user_id,
-    #         skill_share_request_id=skill_share_id
-    #     )
+        # Process the refund
+        return await self.refund_tokens(
+            requester_id=user_id,
+            skill_share_request_id=skill_share_id
+        )

@@ -1,13 +1,14 @@
 # routes/skill_share.py
-import re
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 
 from app.config.database.db import get_db
-from app.core.skill_share.services.services_skill_share import SkillShareService
-from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, IncomingCreateSkillShareRequestT, SkillShareStatusEnum
+from app.core.skill_share.services.skill_share.s_skill_share import SkillShareService
+from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
+from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, IncomingCreateSkillShareRequestT
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import UserT
 from app.utils import convert_sqlalchemy_dict

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from app.config.database.db import AsyncSession
 from app.core.skill_share.model.ongoing_share_model import OngoingSkillShareModel
-from app.core.skill_share.services.services_skill_share import SkillShareService
+import app.core.skill_share.services.skill_share.s_skill_share as SkillShareService
 from app.core.skill_share.types.types_skill_share import SkillShareStatusEnum
 from app.core.skills.models.model_skills import SkillModel
 from typing import List, Dict, Any, Optional
@@ -33,7 +33,7 @@ class OngoingSkillShareService(CrudService):
         notes: Optional[str] = None
     ) -> ResponseMessage:
         # Verify skill share exists and is accepted
-        share_service = SkillShareService(self.db)
+        share_service = SkillShareService.SkillShareService(self.db)
         share = await share_service.get_one({
             "id": skill_share_id,
             "status": SkillShareStatusEnum.ACCEPTED.value
@@ -49,7 +49,7 @@ class OngoingSkillShareService(CrudService):
             "skill_share_id": skill_share_id,
             "start_date": start_date,
             "end_date": end_date,
-            "status": SkillShareStatusEnum.ACCEPTED,
+            "status": SkillShareStatusEnum.ACCEPTED.value,
             "notes": notes
         }
 

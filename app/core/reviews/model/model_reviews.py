@@ -3,7 +3,7 @@
 from sqlalchemy import Column, ForeignKey, String, Enum, DateTime, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.config.database.db import BaseModelClass
-from app.core.skill_share.types.types_skill_share import SkillShareStatusEnum
+
 class ReviewModel(BaseModelClass):
     __tablename__ = "REVIEWS"
 

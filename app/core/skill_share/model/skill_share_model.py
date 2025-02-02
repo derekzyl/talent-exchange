@@ -3,7 +3,7 @@
 from sqlalchemy import Column, ForeignKey, String, Enum, DateTime, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.config.database.db import BaseModelClass
-from app.core.skill_share.types.types_skill_share import SkillShareStatusEnum
+from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
 
 class SkillShareRequestModel(BaseModelClass):
     __tablename__ = "SKILL_SHARE_REQUESTS"

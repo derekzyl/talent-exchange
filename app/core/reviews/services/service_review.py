@@ -5,8 +5,9 @@ from app.config.database.db import AsyncSession
 from app.core.reviews.model.model_reviews import ReviewModel
 from app.core.reviews.types.types_review import CreateReviewT
 from app.core.skill_share.model.ongoing_share_model import OngoingSkillShareModel
-from app.core.skill_share.services.services_skill_share import SkillShareService
-from app.core.skill_share.types.types_skill_share import SkillShareStatusEnum
+import  app.core.skill_share.services.skill_share.s_skill_share as SkillShareService
+
+from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
 from app.core.skills.models.model_skills import SkillModel
 from typing import List, Dict, Any, Optional
 from fastapi import HTTPException, status
@@ -29,10 +30,10 @@ class ReviewService(CrudService):
 
     async def create_review(self, data: CreateReviewT) -> ResponseMessage:
         # Verify the skill share exists and is completed
-        share_service = SkillShareService(self.db)
+        share_service = SkillShareService.SkillShareService(self.db)
         share = await share_service.get_one({
             "id": data['skill_share_id'],
-            "status": SkillShareStatusEnum.COMPLETED
+            "status": SkillShareStatusEnum.COMPLETED.value
         })
 
         if not share.get('data'):

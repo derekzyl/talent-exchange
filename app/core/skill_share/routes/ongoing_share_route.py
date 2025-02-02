@@ -4,9 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 
 from app.config.database.db import get_db
-from app.core.skill_share.services.service_exhange import OngoingSkillShareService
-from app.core.skill_share.services.services_skill_share import SkillShareService
-from app.core.skill_share.types.types_skill_share import SkillShareStatusEnum
+import app.core.skill_share.services.service_exchange.service_exhange as OngoingSkillShareService
+
+from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
 from app.core.users.services.service_user import UserService
 from app.core.users.types.type_user import UserT
 from app.utils.crud.types_crud import ResponseMessage
@@ -26,7 +26,7 @@ async def create_ongoing_share(
     notes: Optional[str] = None
 ):
     """Create a new ongoing skill share session"""
-    service = OngoingSkillShareService(db)
+    service = OngoingSkillShareService.OngoingSkillShareService(db)
     return await service.create_ongoing_share(
         share_id,
         start_date,
@@ -40,8 +40,9 @@ async def get_active_shares(
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
     """Get all active ongoing skill shares for the current user"""
+    from app.core.skill_share.services.skill_share.s_skill_share import SkillShareService
     share_service = SkillShareService(db)
-    ongoing_service = OngoingSkillShareService(db)
+    ongoing_service = OngoingSkillShareService.OngoingSkillShareService(db)
     
     # Get all shares where user is either provider or requester
     user_shares = await share_service.get_many(
@@ -79,7 +80,8 @@ async def complete_ongoing_share(
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
     """Mark an ongoing skill share as completed"""
-    ongoing_service = OngoingSkillShareService(db)
+    ongoing_service = OngoingSkillShareService.OngoingSkillShareService(db)
+    from app.core.skill_share.services.skill_share.s_skill_share import SkillShareService
     share_service = SkillShareService(db)
     
     # Verify the ongoing share exists and user is involved

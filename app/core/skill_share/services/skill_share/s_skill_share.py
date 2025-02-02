@@ -4,8 +4,10 @@ from xdrlib import ConversionError
 from app.config.database.db import AsyncSession
 from app.core.skill_share.model.skill_share_model import SkillShareRequestModel
 # import app.core.skill_share.services.service_exhange
-from app.core.skill_share.services.token_share import TokenSkillService
-from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT, SkillShareStatusEnum
+from app.core.skill_share.services.service_exchange.service_exhange import OngoingSkillShareService
+from app.core.skill_share.services.token_share.token_share import TokenSkillService
+from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
+from app.core.skill_share.types.types_skill_share import CreateSkillShareRequestT
 from app.core.skills.models.model_skills import SkillModel 
 from typing import List, Dict, Any, Optional
 from fastapi import HTTPException, status
@@ -37,14 +39,23 @@ class SkillShareService(CrudService):
                 detail="Cannot request skill share with yourself"
             )
 
-        # Check for existing pending requests
-        existing_request = await self.get_one({
-            "requester_id": data['requester_id'],
-            "provider_id": data['provider_id'],
-            "requester_skill_id": data['requester_skill_id'],
-            "provider_skill_id": data['provider_skill_id'],
-            "status": SkillShareStatusEnum.PENDING.value
-        })
+        if data.get('requester_skill_id') != None:
+            print('here passed check  (1)')
+            existing_request = await self.get_one({
+                "provider_id": data['provider_id'],
+                "requester_skill_id": data['requester_skill_id'],
+                "requester_id": data['requester_id'],
+                "provider_skill_id": data['provider_skill_id'],
+                "status": SkillShareStatusEnum.PENDING.value
+            })
+        else:
+            print('here passed check  (2)')
+            existing_request = await self.get_one({
+                "provider_id": data['provider_id'],
+                "requester_id": data['requester_id'],
+                "provider_skill_id": data['provider_skill_id'],
+                "status": SkillShareStatusEnum.PENDING.value
+            })
 
         if existing_request.get('data'):
             raise HTTPException(
@@ -52,12 +63,9 @@ class SkillShareService(CrudService):
                 detail="A pending request already exists"
             )
 
-        skills = SkillService(self.db)   
-        requester_skill = await skills.get_one({"user_id": data['requester_skill_id']})
-        provider_skill = await skills.get_one({"user_id": data['provider_skill_id']})
-        
         
 
+        print('here passed check 4')
          
         skill_user =await  self.create(data) # type: ignore
 
@@ -118,12 +126,12 @@ class SkillShareService(CrudService):
             )
 
         # Handle token refund for cancelled requests
-        # if (new_status == SkillShareStatusEnum.CANCELLED or 
-        #     new_status == SkillShareStatusEnum.REJECTED) and not request_data.get('requester_skill_id'):
-        #     await self.token_service.refund_tokens(
-        #         requester_id=request_data.get('requester_id'),
-        #         skill_share_request_id=request_id
-        #     )
+        if (new_status == SkillShareStatusEnum.CANCELLED or 
+            new_status == SkillShareStatusEnum.REJECTED) and not request_data.get('requester_skill_id'):
+            await self.token_service.refund_tokens(
+                requester_id=request_data.get('requester_id'),
+                skill_share_request_id=request_id
+            )
 
         updated_request= await self.update(
             filter={"id": request_id},
@@ -131,14 +139,15 @@ class SkillShareService(CrudService):
         )
         reponse_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(updated_request['data'])
 
-        # if new_status == SkillShareStatusEnum.ACCEPTED:
-        #     ongoing_service = app.core.skill_share.services.service_exhange.OngoingSkillShareService(self.db)
-        #     await ongoing_service.create_ongoing_share(
-        #         skill_share_id=request_id,
-        #         start_date=datetime.utcnow(),
-        #         end_date=datetime.utcnow() + timedelta(days=30),  # Example duration
-        #         notes=None
-        # )
+        if new_status == SkillShareStatusEnum.ACCEPTED:
+            ongoing_service = OngoingSkillShareService(self.db)
+            await ongoing_service.create_ongoing_share(
+                skill_share_id=request_id,
+                start_date=datetime.utcnow(),
+                end_date=datetime.utcnow() + timedelta(days=30),  # Example duration
+                notes=None
+        )
+        
 
         return response_message(
             data=reponse_data,

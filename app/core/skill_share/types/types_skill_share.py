@@ -3,12 +3,8 @@ from enum import Enum
 from typing import TypedDict, List, Optional
 from datetime import datetime
 
-class SkillShareStatusEnum(Enum):
-    PENDING = "pending"
-    ACCEPTED = "accepted"
-    REJECTED = "rejected"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
+
 
 
 # Type definitions

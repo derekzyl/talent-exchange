@@ -13,6 +13,7 @@ from app.core.skills.routes.route_available_time import available_time_router
 from app.core.reviews.routes.routes import review_router
 from app.core.skill_share.routes.route_skill_share import skill_share_router
 from app.core.skill_share.routes.ongoing_share_route import ongoing_share_router
+from app.core.skill_share.routes.token_skills_route import skill_token_router
 from app.versions.types_routes import RouterData
 
 routesV1:list[RouterData]= [{
@@ -27,8 +28,13 @@ routesV1:list[RouterData]= [{
 ,{
     'api_route':review_router,'path':"review",'tags':['reviews']
 }, {
-    'api_route':skill_share_router,'path':"skill-share",'tags':['skill-share']},{
+    'api_route':skill_share_router,'path':"skill-share",'tags':['skill-share']},
+{
     'api_route':ongoing_share_router,'path':"ongoing_router",'tags':['ongoing_skill-share']
+    },{
+
+    'api_route':skill_token_router,'path':"skill_token_router",'tags':['skill_token_router']
+        
     }
                        ]
 

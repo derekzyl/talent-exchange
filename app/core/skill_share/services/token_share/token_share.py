@@ -30,6 +30,7 @@ class TokenSkillService(CrudService):
         self,
         requester_id: str,
         skill_share_request_id: str,
+        provider_id: str,
         token_amount: float = 5.0
     ) -> ResponseMessage:
         # Get or create requester's token account
@@ -39,15 +40,18 @@ class TokenSkillService(CrudService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Could not process token transaction"
             )
-
+        provider_token = await self.get_or_create_user_token(provider_id)
         # Check if requester has enough tokens
-        converted_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(requester_token['data'])
+        converted_data = (convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(requester_token['data'])).get("TokenSkillModel")
         if not converted_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Could not process token transaction"
             )
-        
+
+        convert_provider =( convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(provider_token['data'])).get("TokenSkillModel")
+
+        print(convert_provider, 'provider', converted_data, 'converted_data')
         current_balance = float(converted_data.get('balance', 0))
         if current_balance < token_amount:
             raise HTTPException(
@@ -56,7 +60,7 @@ class TokenSkillService(CrudService):
             )
 
         # Create transaction record
-        transaction = await self.db.merge(TokenSkillTransactionModel(
+        await self.db.merge(TokenSkillTransactionModel(
             token_id=converted_data.get('id'),
             skill_share_request_id=skill_share_request_id,
             amount=token_amount,
@@ -65,9 +69,14 @@ class TokenSkillService(CrudService):
         
         # Update token balance
         new_balance = current_balance - token_amount
+        provider_balance = float(convert_provider.get('balance', 0)) + token_amount
         await self.update(
             filter={"id": converted_data.get('id')},
             data={"balance": new_balance}
+        )
+        await self.update(
+            filter={"id": convert_provider.get('id')},
+            data={"balance": provider_balance}
         )
         
         await self.db.commit()

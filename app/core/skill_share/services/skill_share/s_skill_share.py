@@ -40,7 +40,7 @@ class SkillShareService(CrudService):
             )
 
         if data.get('requester_skill_id') != None:
-            print('here passed check  (1)')
+ 
             existing_request = await self.get_one({
                 "provider_id": data['provider_id'],
                 "requester_skill_id": data['requester_skill_id'],
@@ -49,7 +49,7 @@ class SkillShareService(CrudService):
                 "status": SkillShareStatusEnum.PENDING.value
             })
         else:
-            print('here passed check  (2)')
+   
             existing_request = await self.get_one({
                 "provider_id": data['provider_id'],
                 "requester_id": data['requester_id'],
@@ -65,7 +65,6 @@ class SkillShareService(CrudService):
 
         
 
-        print('here passed check 4')
          
         skill_user =await  self.create(data) # type: ignore
 
@@ -88,7 +87,8 @@ class SkillShareService(CrudService):
             try:
                 await self.token_service.process_skill_share_token(
                     requester_id=data['requester_id'],
-                    skill_share_request_id=skill_user['data'].id
+                    skill_share_request_id=skill_user['data'].id,
+                    provider_id=data['provider_id'],
                 )
             except HTTPException as e:
                 # Rollback the skill share request if token processing fails
@@ -129,7 +129,7 @@ class SkillShareService(CrudService):
         if (new_status == SkillShareStatusEnum.CANCELLED or 
             new_status == SkillShareStatusEnum.REJECTED) and not request_data.get('requester_skill_id'):
             await self.token_service.refund_tokens(
-                requester_id=request_data.get('requester_id'),
+                requester_id=request_data.get("SkillShareRequestModel", {}).get('requester_id'),
                 skill_share_request_id=request_id
             )
 
@@ -140,7 +140,7 @@ class SkillShareService(CrudService):
         reponse_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(updated_request['data'])
         
         if new_status.value == SkillShareStatusEnum.ACCEPTED.value:
-            print('inside accepted')
+            
             ongoing_service = OngoingSkillShareService(self.db)
             c= await ongoing_service.create_ongoing_share(
                 skill_share_id=request_id,

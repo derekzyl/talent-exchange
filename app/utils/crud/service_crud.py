@@ -189,11 +189,12 @@ class CrudService:
         )
 
     async def update(self, filter: dict[str, Any], data: Dict[str, Any]):
+        print("filter", filter) 
         query = update(self.model).filter_by(**filter). values(**data, updated_at=func.now()).execution_options(synchronize_session="fetch")
         await self.db.execute(query)
         await self.db.commit()
 
-        updated_item = await self.get_one(**filter)
+        updated_item = await self.get_one(data=filter)
         if updated_item:
             return response_message(data=updated_item, doc_length=1, error=None, message="Data updated successfully", success_status=True)
 

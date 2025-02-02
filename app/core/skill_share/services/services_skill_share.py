@@ -108,19 +108,22 @@ class SkillShareService(CrudService):
             )
 
         request_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(request['data'])
-        if not request_data or request_data.get('provider_id') != user_id:
+        provider_id = request_data.get("SkillShareRequestModel", {}).get("provider_id")
+
+        print(provider_id, 'user', user_id) 
+        if not request_data or provider_id!= user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only the provider can update the request status"
             )
 
         # Handle token refund for cancelled requests
-        if (new_status == SkillShareStatusEnum.CANCELLED or 
-            new_status == SkillShareStatusEnum.REJECTED) and not request_data.get('requester_skill_id'):
-            await self.token_service.refund_tokens(
-                requester_id=request_data.get('requester_id'),
-                skill_share_request_id=request_id
-            )
+        # if (new_status == SkillShareStatusEnum.CANCELLED or 
+        #     new_status == SkillShareStatusEnum.REJECTED) and not request_data.get('requester_skill_id'):
+        #     await self.token_service.refund_tokens(
+        #         requester_id=request_data.get('requester_id'),
+        #         skill_share_request_id=request_id
+        #     )
 
         updated_request= await self.update(
             filter={"id": request_id},
@@ -142,3 +145,4 @@ class SkillShareService(CrudService):
             message=updated_request.get("message", ""),
             success_status=updated_request.get("success_status", False),
         )
+        

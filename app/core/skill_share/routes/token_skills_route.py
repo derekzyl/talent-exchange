@@ -28,7 +28,8 @@ async def purchase_tokens(
 ):
     """Purchase tokens"""
     service = TokenSkillService(db)
-    return await service.purchase_tokens(mc      user_id=current_user["id"],
+    return await service.purchase_tokens(
+        user_id=current_user["id"],
         amount=purchase_data.amount,
         payment_method=purchase_data.payment_method,
         currency=purchase_data.currency

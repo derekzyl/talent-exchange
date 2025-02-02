@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from sqlalchemy import or_, select
 from app.config.database.db import get_db
+from app.core.reviews.types.types_review import ReviewRatingEnum
 import app.core.skill_share.services.service_exchange.service_exhange as OngoingSkillShareService
 
 from app.core.skill_share.types.enum_skills import SkillShareStatusEnum
@@ -87,7 +88,7 @@ async def complete_ongoing_share(
     share_service = SkillShareService(db)
     
     # Verify the ongoing share exists and user is involved
-    ongoing_share = await ongoing_service.get_one({"id": share_id})
+    ongoing_share = await ongoing_service.get_one({"skill_share_id": share_id})
     if not ongoing_share.get("data"):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -95,38 +96,64 @@ async def complete_ongoing_share(
         )
     
     # Get the original share request to verify user permission
-    ongoing_share_data = ongoing_share.get("data")
+    old_share_data = ongoing_share.get("data")
+
+    
+    new_ongoing = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(old_share_data)
+
+    ongoing_share_data = new_ongoing.get("OngoingSkillShareModel")
     if not ongoing_share_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Ongoing share data not found"
         )
     
-    original_share = await share_service.get_one({
+    new_share = await share_service.get_one({
         "id": ongoing_share_data["skill_share_id"]
     })
-    
-    if not original_share.get("data"):
+    original_share = (convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(new_share.get('data'))).get('SkillShareRequestModel')
+    print(original_share, 'original share')
+    if not new_share.get("data"):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Original share request not found"
         )
     
-    if ("data" not in original_share or 
-        original_share["data"]["requester_id"] != current_user["id"] and 
-        original_share["data"]["provider_id"] != current_user["id"]):
+    if ( 
+        original_share["requester_id"] != current_user["id"] and 
+        original_share["provider_id"] != current_user["id"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to complete this share"
         )
+    print(ongoing_share_data, 'convert in ongoing')
     
     # Update both ongoing share and original share request status
     await ongoing_service.update(
-        filter={"id": share_id},
+        filter={"id": ongoing_share_data['id']},
         data={"status": SkillShareStatusEnum.COMPLETED.value}
     )
     
-    return await share_service.update(
+    ret=  await share_service.update(
         filter={"id": ongoing_share_data["skill_share_id"]},
         data={"status": SkillShareStatusEnum.COMPLETED.value}
+
+        
+    ) 
+    datss =(convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(ret['data'])).get("SkillShareRequestModel") if ret.get('data') else {}
+    if datss !={}:
+        from app.core.reviews.services.service_review import ReviewService
+        
+        review = ReviewService(db)
+        await review.create_review({
+        'reviewer_id': current_user["id"],
+        "reviewee_id": original_share["requester_id"] if original_share["requester_id"] != current_user["id"] else original_share["provider_id"],
+        "skill_share_id": share_id,
+        "rating": '0',
+        "comment": ''
+        })
+    return ResponseMessage(
+        data=datss,
+        message="Ongoing share marked as completed",
+        success_status=True
     )

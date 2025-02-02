@@ -17,7 +17,7 @@ class TokenSkillTransactionModel(BaseModelClass):
     __tablename__ = "SKILL_TOKEN_TRANSACTIONS"
 
     token_id: Mapped[str] = mapped_column(ForeignKey("SKILL_TOKENS.id"))
-    skill_share_request_id: Mapped[str] = mapped_column(ForeignKey("SKILL_SHARE_REQUESTS.id"))
+    skill_share_request_id: Mapped[str] = mapped_column(ForeignKey("SKILL_SHARE_REQUESTS.id"), nullable=True)
     amount: Mapped[float] = mapped_column(Float)
     transaction_type: Mapped[str] = mapped_column(String)  # 'DEBIT' or 'CREDIT'
     

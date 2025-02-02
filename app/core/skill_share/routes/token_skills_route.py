@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated, Any
+from typing import Annotated, Any, TypedDict
+from fastapi.background import P
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config.database.db import get_db
@@ -24,9 +25,16 @@ async def get_token_balance(
     data = convert.get('data') if convert.get('data') else {}
     convert_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(data)
     return response_message(data=convert_data, message=convert.get("message", ""), doc_length=len(convert_data) if convert_data else 0, success_status=convert.get("success_status", False))
+
+
+
+class PurchaseData(TypedDict):
+    amount: int
+    payment_method: str
+
 @skill_token_router.post("/purchase", response_model=ResponseMessage)
 async def purchase_tokens(
-    purchase_data: Any,
+    purchase_data: PurchaseData,
     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -34,9 +42,9 @@ async def purchase_tokens(
     service = TokenSkillService(db)
     return await service.purchase_tokens(
         user_id=current_user["id"],
-        amount=purchase_data.amount,
-        payment_method=purchase_data.payment_method,
-        currency=purchase_data.currency
+        amount=purchase_data['amount'],
+        payment_method=purchase_data['payment_method'],
+        
     )
 
 @skill_token_router.post("/transfer", response_model=ResponseMessage)

@@ -155,12 +155,13 @@ class TokenSkillService(CrudService):
             )
 
         # Create purchase transaction record
+        print("heere", converted_data)
         transaction = await self.db.merge(TokenSkillTransactionModel(
-            token_id=converted_data.get('id'),
+            token_id=converted_data.get("TokenSkillModel").get('id'),
+           skill_share_request_id ="20250202120726r6v7lwp0vp4f9a9913602541ab96e94739da0ebc48",
             amount=amount,
-            transaction_type='PURCHASE',
-            payment_method=payment_method,
-            currency=currency
+            transaction_type='CREDIT',
+  
         ))
 
         # Update token balance

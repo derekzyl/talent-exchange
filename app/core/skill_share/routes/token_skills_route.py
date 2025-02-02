@@ -47,20 +47,20 @@ async def purchase_tokens(
         
     )
 
-@skill_token_router.post("/transfer", response_model=ResponseMessage)
-async def transfer_tokens(
-    transfer_data: Any,
-    current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    """Transfer tokens to another user"""
-    service = TokenSkillService(db)
-    return await service.transfer_tokens(
-        sender_id=current_user["id"],
-        recipient_id=transfer_data.recipient_id,
-        amount=transfer_data.amount,
-        message=transfer_data.message
-    )
+# @skill_token_router.post("/transfer", response_model=ResponseMessage)
+# async def transfer_tokens(
+#     transfer_data: Any,
+#     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
+#     db: Annotated[AsyncSession, Depends(get_db)]
+# ):
+#     """Transfer tokens to another user"""
+#     service = TokenSkillService(db)
+#     return await service.transfer_tokens(
+#         sender_id=current_user["id"],
+#         recipient_id=transfer_data.recipient_id,
+#         amount=transfer_data.amount,
+#         message=transfer_data.message
+#     )
 
 @skill_token_router.get("/transactions", response_model=ResponseMessage)
 async def get_token_transactions(
@@ -77,15 +77,15 @@ async def get_token_transactions(
         offset=offset
     )
 
-@skill_token_router.post("/refund/{skill_share_id}", response_model=ResponseMessage)
-async def refund_tokens(
-    skill_share_id: str,
-    current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
-):
-    """Refund tokens for a canceled skill share request"""
-    service = TokenSkillService(db)
-    return await service.process_refund(
-        user_id=current_user["id"],
-        skill_share_id=skill_share_id
-    )
+# @skill_token_router.post("/refund/{skill_share_id}", response_model=ResponseMessage)
+# async def refund_tokens(
+#     skill_share_id: str,
+#     current_user: Annotated[UserT, Depends(UserService.get_logged_in_user)],
+#     db: Annotated[AsyncSession, Depends(get_db)]
+# ):
+#     """Refund tokens for a canceled skill share request"""
+#     service = TokenSkillService(db)
+#     return await service.process_refund(
+#         user_id=current_user["id"],
+#         skill_share_id=skill_share_id
+#     )

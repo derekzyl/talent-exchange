@@ -165,10 +165,10 @@ class TokenSkillService(CrudService):
         ))
 
         # Update token balance
-        current_balance = float(converted_data.get('balance', 0))
+        current_balance = float(converted_data.get("TokenSkillModel").get('balance', 0))
         new_balance = current_balance + amount
         await self.update(
-            filter={"id": converted_data.get('id')},
+            filter={"id": converted_data.get("TokenSkillModel").get('id')},
             data={"balance": new_balance}
         )
 
@@ -275,7 +275,8 @@ class TokenSkillService(CrudService):
                 detail="User token account not found"
             )
 
-        token_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(token['data'])
+        token_data = (convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(token['data'])).get("TokenSkillModel")
+        print(token_data, 'token data')     
         if not token_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

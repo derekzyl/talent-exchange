@@ -138,7 +138,7 @@ class SkillShareService(CrudService):
             data={"status": new_status.value}
         )
         reponse_data = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(updated_request['data'])
-        print('here', new_status.value)
+        
         if new_status.value == SkillShareStatusEnum.ACCEPTED.value:
             print('inside accepted')
             ongoing_service = OngoingSkillShareService(self.db)
@@ -149,7 +149,7 @@ class SkillShareService(CrudService):
                 notes=None
         )
         sc = convert_sqlalchemy_dict.sqlalchemy_obj_to_dict(c['data']) if c.get('data') else None
-        print('here', sc)
+        
 
         return response_message(
             data=reponse_data,

@@ -61,19 +61,88 @@ class AuthMiddleware(BaseHTTPMiddleware):
             log.logs.error(f"Error getting user: {e}")
             return None
 
+    # async def dispatch(
+    #     self, request: Request, call_next: RequestResponseEndpoint
+    # ) -> Response:
+    #     if self.should_skip_auth(request.url.path):
+            
+    #         return await call_next(request)
+
+    #     try:
+    #         auth_header = request.headers.get("Authorization")
+    #         if not auth_header:
+    #             raise HTTPException(
+    #                 status_code=401,
+    #                 detail=response_message(
+    #                     error="Missing authorization header",
+    #                     success_status=False,
+    #                     message="Unauthorized"
+    #                 )
+    #             )
+
+    #         scheme, token = auth_header.split()
+    #         if scheme.lower() != "bearer":
+    #             raise HTTPException(
+    #                 status_code=401,
+    #                 detail=response_message(
+    #                     error="Invalid authentication scheme",
+    #                     success_status=False,
+    #                     message="Unauthorized"
+    #                 )
+    #             )
+
+    #         current_user_response = await self.get_current_user(token)
+    #         if not current_user_response or "data" not in current_user_response:
+    #             raise HTTPException(
+    #                 status_code=401,
+    #                 detail=response_message(
+    #                     error="Invalid or expired token",
+    #                     success_status=False,
+    #                     message="Unauthorized"
+    #                 )
+    #             )
+    #         user = dict(current_user_response["data"])
+    #         if not user:
+    #             raise HTTPException(
+    #                 status_code=401,
+    #                 detail=response_message(
+    #                     error="Invalid or expired token ",
+    #                     success_status=False,
+    #                     message="Unauthorized"
+    #                 )
+    #             )
+
+    #         # Add user to request state
+    #         request.state.user = user
+            
+    #         response = await call_next(request)
+    #         return response
+
+    #     except HTTPException as exc:
+    #         raise exc
+    #     except Exception as e:
+    #         raise HTTPException(
+    #             status_code=401,
+    #             detail=response_message(
+    #                 error=str(e),
+    #                 success_status=False,
+    #                 message="response error"
+    #             )
+    #         )
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         if self.should_skip_auth(request.url.path):
-            
             return await call_next(request)
-
+            
         try:
             auth_header = request.headers.get("Authorization")
             if not auth_header:
-                raise HTTPException(
+                # Instead of raising, return a JSONResponse directly
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
                     status_code=401,
-                    detail=response_message(
+                    content=response_message(
                         error="Missing authorization header",
                         success_status=False,
                         message="Unauthorized"
@@ -82,69 +151,87 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
             scheme, token = auth_header.split()
             if scheme.lower() != "bearer":
-                raise HTTPException(
+                # Return response instead of raising
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
                     status_code=401,
-                    detail=response_message(
+                    content=response_message(
                         error="Invalid authentication scheme",
                         success_status=False,
                         message="Unauthorized"
                     )
                 )
 
+            # Rest of your auth logic...
             current_user_response = await self.get_current_user(token)
             if not current_user_response or "data" not in current_user_response:
-                raise HTTPException(
+                # Return response instead of raising
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
                     status_code=401,
-                    detail=response_message(
+                    content=response_message(
                         error="Invalid or expired token",
                         success_status=False,
                         message="Unauthorized"
                     )
                 )
-            user = dict(current_user_response["data"])
-            if not user:
-                raise HTTPException(
-                    status_code=401,
-                    detail=response_message(
-                        error="Invalid or expired token ",
-                        success_status=False,
-                        message="Unauthorized"
-                    )
-                )
-
+                
             # Add user to request state
             request.state.user = user
             
-            response = await call_next(request)
-            return response
-
-        except HTTPException as exc:
-            raise exc
+            # Pass to the next middleware or route handler
+            return await call_next(request)
+            
         except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=response_message(
+            log.logs.error(f"Authentication error: {str(e)}")
+            # Return error response instead of raising
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=401,
+                content=response_message(
                     error=str(e),
                     success_status=False,
-                    message="response error"
+                    message="Authentication failed"
                 )
             )
-
+    # def should_skip_auth(self, path: str) -> bool:
+    #     """Define paths that should skip authentication"""
+    #     public_paths = {
+    #         "/docs",
+    #         "/redoc",
+    #         "/openapi.json",
+    #         "/api/v1/auth/login",
+      
+    #         "/api/v1/auth/signup",
+    #         "/auth/register",
+            
+            
+            
+    #     }
+    #     return any(path.startswith(public_path) for public_path in public_paths)
     def should_skip_auth(self, path: str) -> bool:
         """Define paths that should skip authentication"""
-        public_paths = {
+        # Exact match paths
+        exact_paths = {
+            "/",  # Home route exactly
+            "/api/v1/auth/login",
+            "/api/v1/auth/signup",
+            "/auth/register",
+        }
+        
+        # Prefix paths that include all sub-paths
+        prefix_paths = {
             "/docs",
             "/redoc",
             "/openapi.json",
-            "/api/v1/auth/login",
-      
-            "/api/v1/auth/signup",
-            "/auth/register",
-            
-            
-            
         }
-        return any(path.startswith(public_path) for public_path in public_paths)
+        
+        # Check for exact matches first
+        if path in exact_paths:
+            return True
+            
+        # Then check for prefix matches
+        return any(path.startswith(prefix_path) for prefix_path in prefix_paths)
 
 
 class UserServices:

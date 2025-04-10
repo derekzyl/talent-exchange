@@ -2,18 +2,31 @@
 
 set -e  # Exit on error
 
-# Check for .env
+# Check for .env with very conspicuous warning
 if [ ! -f ".env" ]; then
-    echo "⚠️  .env file not found."
+    echo ""
+    echo "⚠️  ========================= WARNING ========================= ⚠️"
+    echo "⚠️                   .ENV FILE NOT FOUND!                      ⚠️"
+    echo "⚠️  ========================================================== ⚠️"
+    echo ""
 
     if [ -f "example.env" ]; then
         echo "📄 Found example.env, creating .env from it..."
         cp example.env .env
         echo "✅ .env file created."
     else
-        echo "❌ example.env not found. Cannot continue without .env file."
+        echo "❌ ========================================================== ❌"
+        echo "❌  CRITICAL ERROR: example.env not found.                    ❌"
+        echo "❌  Cannot continue without .env file.                        ❌"
+        echo "❌ ========================================================== ❌"
         exit 1
     fi
+    
+    echo ""
+    echo "⚠️  Please review your .env file before continuing!           ⚠️"
+    echo "⚠️  Press Enter to continue or Ctrl+C to abort...             ⚠️"
+    echo " "
+   
 fi
 
 # Install pip if not installed
@@ -29,7 +42,6 @@ if ! command -v pipenv &> /dev/null; then
     pip install --user pipenv
     export PATH="$HOME/.local/bin:$PATH"
 fi
-
 
 # Add other dependencies from requirements.txt if it exists
 if [ -f "requirements.txt" ]; then

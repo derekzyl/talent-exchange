@@ -1,207 +1,184 @@
-
-# MedConnect Backend with FastAPI, PostgreSQL, Docker, Redis, and AI Integration
+# Talent Exchange Platform API
 
 ## Overview
 
-MedConnect is a medical platform designed to connect patients, doctors, and administrators in a unified space for managing healthcare needs. Patients can consult with doctors, share medical data, and access personalized treatment insights. Doctors can track patient histories, document diagnoses, and suggest treatments. With AI integration, MedConnect offers predictive insights on possible drug reactions, ailments, and treatment recommendations based on patient history.
+The Talent Exchange Platform API is a robust backend service designed to facilitate connections between professionals, employers, and opportunities. Built with FastAPI and modern Python practices, this platform enables efficient talent discovery, skill matching, and professional relationship management.
 
-## Table of Contents
+## Features
 
-1. [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation)
-   - [Running the Application](#running-the-application)
-2. [Project Structure](#project-structure)
-3. [Endpoints](#endpoints)
-   - [Authentication](#authentication)
-   - [User Roles](#user-roles)
-   - [Patient Management](#patient-management)
-   - [Doctor Management](#doctor-management)
-   - [Medical Data](#medical-data)
-   - [Predictive Analysis](#predictive-analysis)
-4. [Database Models](#database-models)
-5. [Dockerization](#dockerization)
-6. [Caching with Redis](#caching-with-redis)
-7. [AI Integration](#ai-integration)
-8. [Testing](#testing)
-9. [Deployment](#deployment)
-10. [Contributing](#contributing)
-11. [License](#license)
+- **User Management**: Registration, authentication, profile creation and management
+- **Skill Cataloging**: Comprehensive skill tracking, categorization, and verification
+- **Search & Matching**: Advanced algorithms to connect talent with opportunities
+- **JWT Authentication**: Secure, token-based API access
+- **Scalable Architecture**: Built with performance and growth in mind
+- **Comprehensive Documentation**: Interactive API docs with testing capabilities
+- **Error Handling**: Detailed error responses for better debugging and user experience
 
-## 1. Getting Started
+## Prerequisites
 
-### Prerequisites
+- Python 3.8+
+- PostgreSQL (recommended) or other supported database
+- Internet connection for dependency installation
 
-- [Python 3.8+](https://www.python.org/downloads/)
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Redis](https://redis.io/)
-- [AI Model Requirements] (see AI model documentation for setup)
+## Installation & Setup
 
-### Installation
+### Quick Start (Recommended)
 
-1. Clone the repository:
+Execute the automated setup script:
 
-   ```bash
-   git clone https://github.com/yourusername/medconnect.git
-   cd medconnect-backend
-   ```
-
-2. Create a virtual environment and activate it:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. Install the required dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Running the Application
-
-1. Start PostgreSQL and Redis services using Docker Compose:
-
-   ```bash
-   docker-compose up -d
-   ```
-
-2. Initialize the database and create tables:
-
-   ```bash
-   python app/db/init_db.py
-   ```
-
-3. Run the FastAPI application:
-
-   ```bash
-   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-   ```
-
-The application will be accessible at `http://localhost:8000`.
-
-## 2. Project Structure
-
-```
-medconnect-backend/
-|-- app/
-|   |-- api/
-|   |   |-- __init__.py
-|   |   |-- patient.py
-|   |   |-- doctor.py
-|   |   |-- medical_data.py
-|   |   |-- predictive_analysis.py
-|   |-- db/
-|   |   |-- __init__.py
-|   |   |-- base.py
-|   |   |-- init_db.py
-|   |   |-- models.py
-|   |   |-- schemas.py
-|   |-- core/
-|   |   |-- __init__.py
-|   |   |-- config.py
-|   |   |-- security.py
-|   |-- ai/
-|   |   |-- __init__.py
-|   |   |-- predictive_model.py
-|   |-- main.py
-|-- tests/
-|   |-- __init__.py
-|   |-- test_endpoints.py
-|-- .env
-|-- .gitignore
-|-- docker-compose.yml
-|-- Dockerfile
-|-- README.md
-|-- requirements.txt
+```bash
+sh run.sh
 ```
 
-## 3. Endpoints
+This script:
+1. Checks for and creates an `.env` file if not present
+2. Installs necessary system dependencies (pip)
+3. Sets up Python environment with pipenv
+4. Installs project dependencies
+5. Launches the FastAPI server
 
-### Authentication
+### Manual Installation
 
-- **POST /login**: Endpoint for user login. Returns an access token.
-
-### User Roles
-
-- **Admin**: Can manage doctors, patients, and access system logs.
-- **Doctor**: Can manage patient records, add medical notes, and generate predictions.
-- **Patient**: Can view their medical history, consult doctors, and review predicted insights.
-
-### Patient Management
-
-- **POST /patients**: Register a new patient.
-- **GET /patients/{patient_id}**: Retrieve patient details by patient ID.
-
-### Doctor Management
-
-- **POST /doctors**: Register a new doctor.
-- **GET /doctors/{doctor_id}**: Retrieve doctor details by doctor ID.
-
-### Medical Data
-
-- **POST /medical_data**: Add new medical data entry for a patient.
-- **GET /medical_data/{patient_id}**: Retrieve all medical data for a patient.
-
-### Predictive Analysis
-
-- **POST /predict**: Generate predictions based on patient data.
-- **GET /predictions/{patient_id}**: Retrieve past predictions for a specific patient.
-
-## 4. Database Models
-
-The backend uses SQLAlchemy ORM to define the following database models:
-
-- **User**: Represents a registered user on the platform.
-- **Doctor**: Represents a doctor with medical credentials.
-- **Patient**: Represents a patient and their medical history.
-- **MedicalData**: Holds patient records and diagnoses.
-- **Prediction**: Stores prediction data for future insights.
-
-## 5. Dockerization
-
-The application uses Docker for easy deployment. The Dockerfile and Docker Compose configuration manage FastAPI, PostgreSQL, and Redis.
-
-## 6. Caching with Redis
-
-Redis is used to cache frequently accessed data, such as medical records and predictions, to improve response time and reduce load.
-
-## 7. AI Integration
-
-AI models for prediction are loaded in the `ai/predictive_model.py` module. The models are trained to predict drug interactions, potential health risks, and best treatment options based on historical data.
-
-## 8. Testing
-
-Run unit tests using:
-
+1. **Clone the repository**:
    ```bash
-   pytest
+   git clone https://github.com/your-organization/talent-exchange.git
+   cd talent-exchange
    ```
 
-## 9. Deployment
-
-For production deployment:
-
-1. Set environment variables in the `.env` file.
-2. Build the Docker image:
-
+2. **Set up environment variables**:
    ```bash
-   docker build -t medconnect-backend .
+   cp example.env .env
+   ```
+   Edit `.env` with appropriate configuration settings:
+   - Database connection details
+   - JWT secret key
+   - Email service configuration
+   - Other environment-specific settings
+
+3. **Install dependencies**:
+   ```bash
+   pip install pipenv
+   pipenv install
+   pipenv run pip install -r requirements.txt
    ```
 
-3. Run the container:
-
+4. **Initialize the database**:
    ```bash
-   docker run -d -p 8000:8000 --name medconnect-backend-container medconnect-backend
+   pipenv run python -m app.scripts.init_db
    ```
 
-## 10. Contributing
+5. **Start the server**:
+   ```bash
+   pipenv run fastapi run
+   ```
+   For development with hot-reload:
+   ```bash
+   pipenv run uvicorn app.main:app --reload
+   ```
 
-We welcome contributions to improve MedConnect. Please follow the guidelines in [CONTRIBUTING.md](CONTRIBUTING.md).
+## API Documentation
 
-## 11. License
+Once the server is running, access the interactive API documentation:
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+## Authentication
+
+The API uses JWT bearer token authentication:
+
+### Public Endpoints (No Authentication Required)
+- `/` - API home/status
+- `/api/v1/auth/login` - User login
+- `/api/v1/auth/signup` - User registration
+- `/auth/register` - Alternative registration endpoint
+- `/docs`, `/redoc`, `/openapi.json` - API documentation
+
+### Protected Endpoints
+All other endpoints require authentication via JWT bearer token:
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+Tokens are obtained through the login endpoint and typically expire after 24 hours.
+
+## API Structure
+
+- `/api/v1/auth/*` - Authentication operations
+- `/api/v1/users/*` - User profile management
+- `/api/v1/skill/*` - Skill definition and management
+- `/api/v1/opportunities/*` - Job/project listings
+- `/api/v1/matches/*` - Talent-opportunity matching endpoints
+
+## Development
+
+### Environment Configuration
+
+Critical environment variables include:
+- `DATABASE_URL`: Connection string for your database
+- `JWT_SECRET_KEY`: Secret key for JWT token generation/validation
+- `EMAIL_SERVICE_*`: Email service configuration for notifications
+
+### Running Tests
+
+```bash
+pipenv run pytest
+```
+
+For coverage report:
+```bash
+pipenv run pytest --cov=app
+```
+
+### Database Migrations
+
+```bash
+pipenv run alembic revision --autogenerate -m "description"
+pipenv run alembic upgrade head
+```
+
+## Deployment
+
+### Production Considerations
+
+1. Use a production-grade ASGI server:
+   ```bash
+   pipenv run gunicorn app.main:app -k uvicorn.workers.UvicornWorker
+   ```
+
+2. Set appropriate environment variables:
+   - `ENVIRONMENT=production`
+   - Secure database credentials
+   - Production-specific service URLs
+
+3. Implement rate limiting and additional security measures
+
+### Docker Support
+
+```bash
+docker build -t talent-exchange-api .
+docker run -p 8000:8000 --env-file .env talent-exchange-api
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit changes: `git commit -am 'Add feature'`
+4. Push to branch: `git push origin feature-name`
+5. Submit a pull request
+
+## Troubleshooting
+
+### Common Issues
+
+- **Database Connection Problems**: Verify database credentials in `.env`
+- **JWT Authentication Failures**: Check token expiration and secret key
+- **Missing Dependencies**: Run `pipenv install` to update environment
+
+For more help, check the logs or create an issue in the repository.
+
+## License
+
+[MIT License](LICENSE)
